@@ -601,7 +601,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -0.44,
+    "raw_logit": -0.4399,
     "raw_score": 0.3918,
     "calibrated_score": 0.3137,
     "is_attack": 0,
@@ -841,7 +841,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -0.459,
+    "raw_logit": -0.4591,
     "raw_score": 0.3872,
     "calibrated_score": 0.3068,
     "is_attack": 0,
@@ -1161,7 +1161,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.2254,
+    "raw_logit": -2.2253,
     "raw_score": 0.0975,
     "calibrated_score": 0.0562,
     "is_attack": 0,
@@ -1193,7 +1193,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.3076,
+    "raw_logit": -1.3077,
     "raw_score": 0.2129,
     "calibrated_score": 0.2391,
     "is_attack": 0,
@@ -2689,7 +2689,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -0.3396,
+    "raw_logit": -0.3395,
     "raw_score": 0.4159,
     "calibrated_score": 0.3678,
     "is_attack": 0,
@@ -3097,7 +3097,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.4635,
+    "raw_logit": -1.4636,
     "raw_score": 0.1879,
     "calibrated_score": 0.2337,
     "is_attack": 0,
@@ -4066,7 +4066,7 @@
   {
     "split": "val",
     "raw_logit": 0.3978,
-    "raw_score": 0.5981,
+    "raw_score": 0.5982,
     "calibrated_score": 0.6145,
     "is_attack": 0,
     "alerted": 0
@@ -4689,7 +4689,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.2371,
+    "raw_logit": -2.237,
     "raw_score": 0.0965,
     "calibrated_score": 0.0441,
     "is_attack": 0,
@@ -7825,7 +7825,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.8953,
+    "raw_logit": -2.8954,
     "raw_score": 0.0524,
     "calibrated_score": 0.0068,
     "is_attack": 0,
@@ -8274,7 +8274,7 @@
   {
     "split": "val",
     "raw_logit": -1.391,
-    "raw_score": 0.1993,
+    "raw_score": 0.1992,
     "calibrated_score": 0.2362,
     "is_attack": 0,
     "alerted": 0
@@ -8642,7 +8642,7 @@
   {
     "split": "val",
     "raw_logit": 0.7412,
-    "raw_score": 0.6772,
+    "raw_score": 0.6773,
     "calibrated_score": 0.6595,
     "is_attack": 0,
     "alerted": 0
@@ -8993,7 +8993,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.4631,
+    "raw_logit": -2.4632,
     "raw_score": 0.0785,
     "calibrated_score": 0.0131,
     "is_attack": 0,
@@ -11609,7 +11609,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.1978,
+    "raw_logit": -1.1977,
     "raw_score": 0.2319,
     "calibrated_score": 0.243,
     "is_attack": 0,
@@ -13433,7 +13433,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.4847,
+    "raw_logit": -2.4846,
     "raw_score": 0.0769,
     "calibrated_score": 0.0128,
     "is_attack": 0,
@@ -13545,7 +13545,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -3.192,
+    "raw_logit": -3.1921,
     "raw_score": 0.0395,
     "calibrated_score": 0.0024,
     "is_attack": 0,
@@ -14577,7 +14577,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -3.8185,
+    "raw_logit": -3.8184,
     "raw_score": 0.0215,
     "calibrated_score": 0.0,
     "is_attack": 0,
@@ -15177,7 +15177,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.1248,
+    "raw_logit": -2.1247,
     "raw_score": 0.1067,
     "calibrated_score": 0.1038,
     "is_attack": 0,
@@ -19457,7 +19457,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.1587,
+    "raw_logit": -1.1586,
     "raw_score": 0.2389,
     "calibrated_score": 0.2444,
     "is_attack": 0,
@@ -21665,7 +21665,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.8724,
+    "raw_logit": -2.8723,
     "raw_score": 0.0535,
     "calibrated_score": 0.0071,
     "is_attack": 0,
@@ -23850,7 +23850,7 @@
   {
     "split": "val",
     "raw_logit": -1.6024,
-    "raw_score": 0.1677,
+    "raw_score": 0.1676,
     "calibrated_score": 0.233,
     "is_attack": 0,
     "alerted": 0
@@ -25841,7 +25841,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.2028,
+    "raw_logit": -1.2029,
     "raw_score": 0.231,
     "calibrated_score": 0.2428,
     "is_attack": 0,
@@ -28483,7 +28483,7 @@
     "split": "val",
     "raw_logit": -0.5058,
     "raw_score": 0.3762,
-    "calibrated_score": 0.2977,
+    "calibrated_score": 0.2978,
     "is_attack": 0,
     "alerted": 0
   },
@@ -30531,7 +30531,7 @@
     "split": "val",
     "raw_logit": -2.2882,
     "raw_score": 0.0921,
-    "calibrated_score": 0.0183,
+    "calibrated_score": 0.0182,
     "is_attack": 0,
     "alerted": 0
   },
@@ -32001,7 +32001,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 0.0656,
+    "raw_logit": 0.0657,
     "raw_score": 0.5164,
     "calibrated_score": 0.5124,
     "is_attack": 0,
@@ -32177,7 +32177,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.2139,
+    "raw_logit": -2.2138,
     "raw_score": 0.0985,
     "calibrated_score": 0.0609,
     "is_attack": 0,
@@ -32185,7 +32185,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.385,
+    "raw_logit": -1.3849,
     "raw_score": 0.2002,
     "calibrated_score": 0.2364,
     "is_attack": 0,
@@ -32809,7 +32809,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.5798,
+    "raw_logit": -1.5799,
     "raw_score": 0.1708,
     "calibrated_score": 0.2331,
     "is_attack": 0,
@@ -33545,7 +33545,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.0681,
+    "raw_logit": -2.068,
     "raw_score": 0.1122,
     "calibrated_score": 0.1393,
     "is_attack": 0,
@@ -34633,7 +34633,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.3414,
+    "raw_logit": -2.3413,
     "raw_score": 0.0878,
     "calibrated_score": 0.0149,
     "is_attack": 0,
@@ -36713,7 +36713,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.0141,
+    "raw_logit": -1.014,
     "raw_score": 0.2662,
     "calibrated_score": 0.2495,
     "is_attack": 0,
@@ -37713,7 +37713,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.2018,
+    "raw_logit": -1.2019,
     "raw_score": 0.2311,
     "calibrated_score": 0.2428,
     "is_attack": 0,
@@ -40449,7 +40449,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.8192,
+    "raw_logit": -2.8193,
     "raw_score": 0.0563,
     "calibrated_score": 0.0079,
     "is_attack": 0,
@@ -44137,7 +44137,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.7471,
+    "raw_logit": -1.747,
     "raw_score": 0.1484,
     "calibrated_score": 0.2322,
     "is_attack": 0,
@@ -45450,7 +45450,7 @@
   {
     "split": "val",
     "raw_logit": -1.5317,
-    "raw_score": 0.1778,
+    "raw_score": 0.1777,
     "calibrated_score": 0.2333,
     "is_attack": 0,
     "alerted": 0
@@ -45553,7 +45553,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -2.4497,
+    "raw_logit": -2.4498,
     "raw_score": 0.0795,
     "calibrated_score": 0.0133,
     "is_attack": 0,
@@ -46297,7 +46297,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.5368,
+    "raw_logit": -1.5367,
     "raw_score": 0.177,
     "calibrated_score": 0.2333,
     "is_attack": 0,
@@ -48147,7 +48147,7 @@
     "split": "val",
     "raw_logit": -1.9972,
     "raw_score": 0.1195,
-    "calibrated_score": 0.2272,
+    "calibrated_score": 0.2271,
     "is_attack": 0,
     "alerted": 0
   },
@@ -48793,7 +48793,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -0.9651,
+    "raw_logit": -0.9652,
     "raw_score": 0.2758,
     "calibrated_score": 0.2512,
     "is_attack": 0,
@@ -51747,7 +51747,7 @@
     "split": "val",
     "raw_logit": 0.1368,
     "raw_score": 0.5342,
-    "calibrated_score": 0.5264,
+    "calibrated_score": 0.5265,
     "is_attack": 0,
     "alerted": 0
   },
@@ -51897,7 +51897,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 1.4098,
+    "raw_logit": 1.4097,
     "raw_score": 0.8037,
     "calibrated_score": 0.6771,
     "is_attack": 0,
@@ -52593,7 +52593,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -0.7563,
+    "raw_logit": -0.7564,
     "raw_score": 0.3194,
     "calibrated_score": 0.2724,
     "is_attack": 0,
@@ -53721,7 +53721,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.3094,
+    "raw_logit": -1.3095,
     "raw_score": 0.2126,
     "calibrated_score": 0.239,
     "is_attack": 1,
@@ -54681,7 +54681,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 4.0906,
+    "raw_logit": 4.0905,
     "raw_score": 0.9835,
     "calibrated_score": 1.0,
     "is_attack": 1,
@@ -56881,7 +56881,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 0.3732,
+    "raw_logit": 0.3731,
     "raw_score": 0.5922,
     "calibrated_score": 0.6113,
     "is_attack": 1,
@@ -58721,7 +58721,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 2.6902,
+    "raw_logit": 2.6903,
     "raw_score": 0.9364,
     "calibrated_score": 0.9766,
     "is_attack": 1,
@@ -59017,7 +59017,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 4.4734,
+    "raw_logit": 4.4733,
     "raw_score": 0.9887,
     "calibrated_score": 1.0,
     "is_attack": 1,
@@ -59465,7 +59465,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.2419,
+    "raw_logit": -1.242,
     "raw_score": 0.2241,
     "calibrated_score": 0.2414,
     "is_attack": 1,
@@ -59521,7 +59521,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 1.8186,
+    "raw_logit": 1.8187,
     "raw_score": 0.8604,
     "calibrated_score": 0.7978,
     "is_attack": 1,
@@ -60506,7 +60506,7 @@
   {
     "split": "val",
     "raw_logit": 0.6729,
-    "raw_score": 0.6622,
+    "raw_score": 0.6621,
     "calibrated_score": 0.6506,
     "is_attack": 1,
     "alerted": 0
@@ -60649,7 +60649,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.372,
+    "raw_logit": -1.3719,
     "raw_score": 0.2023,
     "calibrated_score": 0.2368,
     "is_attack": 1,
@@ -61745,7 +61745,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -0.9566,
+    "raw_logit": -0.9567,
     "raw_score": 0.2775,
     "calibrated_score": 0.2515,
     "is_attack": 1,
@@ -63489,7 +63489,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.1071,
+    "raw_logit": -1.1072,
     "raw_score": 0.2484,
     "calibrated_score": 0.2462,
     "is_attack": 1,
@@ -63753,7 +63753,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 3.9227,
+    "raw_logit": 3.9226,
     "raw_score": 0.9806,
     "calibrated_score": 1.0,
     "is_attack": 1,
@@ -64251,7 +64251,7 @@
     "split": "val",
     "raw_logit": -1.9976,
     "raw_score": 0.1195,
-    "calibrated_score": 0.2168,
+    "calibrated_score": 0.2167,
     "is_attack": 1,
     "alerted": 0
   },
@@ -64497,7 +64497,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 1.5302,
+    "raw_logit": 1.5303,
     "raw_score": 0.822,
     "calibrated_score": 0.6892,
     "is_attack": 1,
@@ -64833,7 +64833,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 4.3861,
+    "raw_logit": 4.3862,
     "raw_score": 0.9877,
     "calibrated_score": 1.0,
     "is_attack": 1,
@@ -65401,7 +65401,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 0.5517,
+    "raw_logit": 0.5518,
     "raw_score": 0.6345,
     "calibrated_score": 0.6347,
     "is_attack": 1,
@@ -65697,7 +65697,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 4.1946,
+    "raw_logit": 4.1945,
     "raw_score": 0.9851,
     "calibrated_score": 1.0,
     "is_attack": 1,
@@ -66377,7 +66377,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 1.9997,
+    "raw_logit": 1.9998,
     "raw_score": 0.8808,
     "calibrated_score": 0.7997,
     "is_attack": 1,
@@ -67009,7 +67009,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -0.9231,
+    "raw_logit": -0.923,
     "raw_score": 0.2843,
     "calibrated_score": 0.2527,
     "is_attack": 1,
@@ -67689,7 +67689,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 4.1334,
+    "raw_logit": 4.1333,
     "raw_score": 0.9842,
     "calibrated_score": 1.0,
     "is_attack": 1,
@@ -70539,7 +70539,7 @@
     "split": "val",
     "raw_logit": -0.5193,
     "raw_score": 0.373,
-    "calibrated_score": 0.296,
+    "calibrated_score": 0.2959,
     "is_attack": 1,
     "alerted": 0
   },
@@ -72033,7 +72033,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 0.5401,
+    "raw_logit": 0.5402,
     "raw_score": 0.6318,
     "calibrated_score": 0.6332,
     "is_attack": 1,
@@ -80569,7 +80569,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -0.3406,
+    "raw_logit": -0.3407,
     "raw_score": 0.4157,
     "calibrated_score": 0.3668,
     "is_attack": 1,
@@ -80577,7 +80577,7 @@
   },
   {
     "split": "val",
-    "raw_logit": -1.059,
+    "raw_logit": -1.0589,
     "raw_score": 0.2575,
     "calibrated_score": 0.2479,
     "is_attack": 1,
@@ -80873,7 +80873,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 1.2468,
+    "raw_logit": 1.2469,
     "raw_score": 0.7768,
     "calibrated_score": 0.6762,
     "is_attack": 1,
@@ -81154,7 +81154,7 @@
   {
     "split": "val",
     "raw_logit": 1.2824,
-    "raw_score": 0.7829,
+    "raw_score": 0.7828,
     "calibrated_score": 0.6764,
     "is_attack": 1,
     "alerted": 0
@@ -82761,7 +82761,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 2.5948,
+    "raw_logit": 2.5947,
     "raw_score": 0.9305,
     "calibrated_score": 0.9743,
     "is_attack": 1,
@@ -83313,7 +83313,7 @@
   },
   {
     "split": "val",
-    "raw_logit": 0.4724,
+    "raw_logit": 0.4723,
     "raw_score": 0.6159,
     "calibrated_score": 0.6243,
     "is_attack": 1,
@@ -84027,7 +84027,7 @@
     "split": "val",
     "raw_logit": 1.6419,
     "raw_score": 0.8378,
-    "calibrated_score": 0.735,
+    "calibrated_score": 0.7349,
     "is_attack": 1,
     "alerted": 0
   },

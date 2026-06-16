@@ -313,8 +313,8 @@ All configs are JSON files. The path is passed via `--config`. Below is a full r
 
 ```json
 {
-  "benign_paths": { "train": "../benign/train.json", "val": "../benign/val.json", "test": "../benign/test.json" },
-  "attack_paths": { "train": "../attack/train.json", "val": "../attack/val.json", "test": "../attack/test.json" }
+  "benign_paths": { "train": "../sip-dataset/benign/train.json", "val": "../sip-dataset/benign/val.json", "test": "../sip-dataset/benign/test.json" },
+  "attack_paths": { "train": "../sip-dataset/attack/train.json", "val": "../sip-dataset/attack/val.json", "test": "../sip-dataset/attack/test.json" }
 }
 ```
 

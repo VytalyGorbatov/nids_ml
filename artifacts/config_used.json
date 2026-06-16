@@ -3,14 +3,14 @@
     "out_dir": "./artifacts"
   },
   "attack_paths": {
-    "test": "../attack/test.json",
-    "train": "../attack/train.json",
-    "val": "../attack/val.json"
+    "test": "../sip-dataset/attack/test.json",
+    "train": "../sip-dataset/attack/train.json",
+    "val": "../sip-dataset/attack/val.json"
   },
   "benign_paths": {
-    "test": "../benign/test.json",
-    "train": "../benign/train.json",
-    "val": "../benign/val.json"
+    "test": "../sip-dataset/benign/test.json",
+    "train": "../sip-dataset/benign/train.json",
+    "val": "../sip-dataset/benign/val.json"
   },
   "data": {
     "buffer_field": "buffers",

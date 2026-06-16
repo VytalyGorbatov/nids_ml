@@ -1,0 +1,742 @@
+{
+  "baseline": {
+    "score_col": "calibrated_score",
+    "columns": [
+      "split",
+      "raw_logit",
+      "raw_score",
+      "calibrated_score",
+      "is_attack",
+      "alerted"
+    ],
+    "ops": {
+      "T_fpr10": {
+        "metrics": {
+          "thr": 0.3884,
+          "benign_fpr": 0.10711050724637682,
+          "snort_fn_recovery": 0.5901639344262295,
+          "added_benign_fp": 473,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 1260
+        },
+        "threshold": 0.3884,
+        "counts": {
+          "fn_low": 875,
+          "fn_high": 1260,
+          "benign_fp": 473,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.2317,
+            "0.5": 0.2471,
+            "0.9": 0.30434
+          },
+          "fn_high_q": {
+            "0.1": 0.50512,
+            "0.5": 0.7887500000000001,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.4589,
+            "0.5": 0.6107,
+            "0.9": 0.68144
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr5": {
+        "metrics": {
+          "thr": 0.5789,
+          "benign_fpr": 0.058197463768115944,
+          "snort_fn_recovery": 0.4894613583138173,
+          "added_benign_fp": 257,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 1045
+        },
+        "threshold": 0.5789,
+        "counts": {
+          "fn_low": 1090,
+          "fn_high": 1045,
+          "benign_fp": 257,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.2321,
+            "0.5": 0.254,
+            "0.9": 0.48997
+          },
+          "fn_high_q": {
+            "0.1": 0.63518,
+            "0.5": 0.9657,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.6134000000000001,
+            "0.5": 0.6746,
+            "0.9": 0.74458
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr1": {
+        "metrics": {
+          "thr": 0.6876,
+          "benign_fpr": 0.009284420289855072,
+          "snort_fn_recovery": 0.3269320843091335,
+          "added_benign_fp": 41,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 698
+        },
+        "threshold": 0.6876,
+        "counts": {
+          "fn_low": 1437,
+          "fn_high": 698,
+          "benign_fp": 41,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.2326,
+            "0.5": 0.2873,
+            "0.9": 0.6742
+          },
+          "fn_high_q": {
+            "0.1": 0.79096,
+            "0.5": 1.0,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.6971,
+            "0.5": 0.7979,
+            "0.9": 0.8531
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      }
+    }
+  },
+  "stage2_control_p020_ssl15_alert020": {
+    "score_col": "calibrated_score",
+    "columns": [
+      "split",
+      "raw_logit",
+      "raw_score",
+      "calibrated_score",
+      "is_attack",
+      "alerted"
+    ],
+    "ops": {
+      "T_fpr10": {
+        "metrics": {
+          "thr": 0.3257,
+          "benign_fpr": 0.10778985507246377,
+          "snort_fn_recovery": 0.5620608899297423,
+          "added_benign_fp": 476,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 1200
+        },
+        "threshold": 0.3257,
+        "counts": {
+          "fn_low": 935,
+          "fn_high": 1200,
+          "benign_fp": 476,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.21104,
+            "0.5": 0.2656,
+            "0.9": 0.2727
+          },
+          "fn_high_q": {
+            "0.1": 0.47495,
+            "0.5": 0.8061,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.3322,
+            "0.5": 0.5482,
+            "0.9": 0.74785
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr5": {
+        "metrics": {
+          "thr": 0.5,
+          "benign_fpr": 0.058423913043478264,
+          "snort_fn_recovery": 0.49086651053864166,
+          "added_benign_fp": 258,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 1048
+        },
+        "threshold": 0.5,
+        "counts": {
+          "fn_low": 1087,
+          "fn_high": 1048,
+          "benign_fp": 258,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.21566000000000002,
+            "0.5": 0.266,
+            "0.9": 0.34471999999999997
+          },
+          "fn_high_q": {
+            "0.1": 0.6426200000000001,
+            "0.5": 0.93495,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.5655300000000001,
+            "0.5": 0.6889000000000001,
+            "0.9": 0.77679
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr1": {
+        "metrics": {
+          "thr": 0.7523,
+          "benign_fpr": 0.009510869565217392,
+          "snort_fn_recovery": 0.3189695550351288,
+          "added_benign_fp": 42,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 681
+        },
+        "threshold": 0.7523,
+        "counts": {
+          "fn_low": 1454,
+          "fn_high": 681,
+          "benign_fp": 42,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.22336,
+            "0.5": 0.2673,
+            "0.9": 0.6885100000000001
+          },
+          "fn_high_q": {
+            "0.1": 0.7951,
+            "0.5": 1.0,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.7575,
+            "0.5": 0.78885,
+            "0.9": 0.83185
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      }
+    }
+  },
+  "stage2_p020_ssl05_alert010": {
+    "score_col": "calibrated_score",
+    "columns": [
+      "split",
+      "raw_logit",
+      "raw_score",
+      "calibrated_score",
+      "is_attack",
+      "alerted"
+    ],
+    "ops": {
+      "T_fpr10": {
+        "metrics": {
+          "thr": 0.3935,
+          "benign_fpr": 0.10552536231884058,
+          "snort_fn_recovery": 0.48758782201405154,
+          "added_benign_fp": 466,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 1041
+        },
+        "threshold": 0.3935,
+        "counts": {
+          "fn_low": 1094,
+          "fn_high": 1041,
+          "benign_fp": 466,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.26083,
+            "0.5": 0.3663,
+            "0.9": 0.387
+          },
+          "fn_high_q": {
+            "0.1": 0.5498,
+            "0.5": 0.7127,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.39495,
+            "0.5": 0.6024499999999999,
+            "0.9": 0.71495
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr5": {
+        "metrics": {
+          "thr": 0.5769,
+          "benign_fpr": 0.058650362318840576,
+          "snort_fn_recovery": 0.40046838407494145,
+          "added_benign_fp": 259,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 855
+        },
+        "threshold": 0.5769,
+        "counts": {
+          "fn_low": 1280,
+          "fn_high": 855,
+          "benign_fp": 259,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.28724000000000005,
+            "0.5": 0.3699,
+            "0.9": 0.4165500000000002
+          },
+          "fn_high_q": {
+            "0.1": 0.6218,
+            "0.5": 0.988,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.60254,
+            "0.5": 0.6876,
+            "0.9": 0.72482
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr1": {
+        "metrics": {
+          "thr": 0.7223,
+          "benign_fpr": 0.007019927536231884,
+          "snort_fn_recovery": 0.2332552693208431,
+          "added_benign_fp": 31,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 498
+        },
+        "threshold": 0.7223,
+        "counts": {
+          "fn_low": 1637,
+          "fn_high": 498,
+          "benign_fp": 31,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.35296,
+            "0.5": 0.3799,
+            "0.9": 0.675
+          },
+          "fn_high_q": {
+            "0.1": 0.98428,
+            "0.5": 1.0,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.7243,
+            "0.5": 0.733,
+            "0.9": 0.7463
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      }
+    }
+  },
+  "stage2_p020_ssl02_alert010": {
+    "score_col": "calibrated_score",
+    "columns": [
+      "split",
+      "raw_logit",
+      "raw_score",
+      "calibrated_score",
+      "is_attack",
+      "alerted"
+    ],
+    "ops": {
+      "T_fpr10": {
+        "metrics": {
+          "thr": 0.4576,
+          "benign_fpr": 0.1057518115942029,
+          "snort_fn_recovery": 0.506791569086651,
+          "added_benign_fp": 467,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 1082
+        },
+        "threshold": 0.4576,
+        "counts": {
+          "fn_low": 1053,
+          "fn_high": 1082,
+          "benign_fp": 467,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.23624,
+            "0.5": 0.4081,
+            "0.9": 0.4311
+          },
+          "fn_high_q": {
+            "0.1": 0.59827,
+            "0.5": 0.7611,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.46732,
+            "0.5": 0.6503,
+            "0.9": 0.8036000000000001
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr5": {
+        "metrics": {
+          "thr": 0.6396,
+          "benign_fpr": 0.058423913043478264,
+          "snort_fn_recovery": 0.40468384074941455,
+          "added_benign_fp": 258,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 864
+        },
+        "threshold": 0.6396,
+        "counts": {
+          "fn_low": 1271,
+          "fn_high": 864,
+          "benign_fp": 258,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.2629,
+            "0.5": 0.409,
+            "0.9": 0.5503
+          },
+          "fn_high_q": {
+            "0.1": 0.65523,
+            "0.5": 0.9892,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.6507700000000001,
+            "0.5": 0.73675,
+            "0.9": 0.82965
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr1": {
+        "metrics": {
+          "thr": 0.8221,
+          "benign_fpr": 0.007246376811594203,
+          "snort_fn_recovery": 0.23091334894613583,
+          "added_benign_fp": 32,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 493
+        },
+        "threshold": 0.8221,
+        "counts": {
+          "fn_low": 1642,
+          "fn_high": 493,
+          "benign_fp": 32,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.33845,
+            "0.5": 0.411,
+            "0.9": 0.6834300000000001
+          },
+          "fn_high_q": {
+            "0.1": 0.98786,
+            "0.5": 1.0,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.8273100000000001,
+            "0.5": 0.8434999999999999,
+            "0.9": 0.87991
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      }
+    }
+  },
+  "stage2_p020_ssl05_alert005": {
+    "score_col": "calibrated_score",
+    "columns": [
+      "split",
+      "raw_logit",
+      "raw_score",
+      "calibrated_score",
+      "is_attack",
+      "alerted"
+    ],
+    "ops": {
+      "T_fpr10": {
+        "metrics": {
+          "thr": 0.3285,
+          "benign_fpr": 0.10552536231884058,
+          "snort_fn_recovery": 0.5189695550351288,
+          "added_benign_fp": 466,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 1108
+        },
+        "threshold": 0.3285,
+        "counts": {
+          "fn_low": 1027,
+          "fn_high": 1108,
+          "benign_fp": 466,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.21736000000000005,
+            "0.5": 0.305,
+            "0.9": 0.3235
+          },
+          "fn_high_q": {
+            "0.1": 0.66737,
+            "0.5": 0.7809999999999999,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.3297,
+            "0.5": 0.67925,
+            "0.9": 0.78145
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr5": {
+        "metrics": {
+          "thr": 0.6725,
+          "benign_fpr": 0.05683876811594203,
+          "snort_fn_recovery": 0.44402810304449647,
+          "added_benign_fp": 251,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 948
+        },
+        "threshold": 0.6725,
+        "counts": {
+          "fn_low": 1187,
+          "fn_high": 948,
+          "benign_fp": 251,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.24300000000000002,
+            "0.5": 0.3101,
+            "0.9": 0.33133999999999997
+          },
+          "fn_high_q": {
+            "0.1": 0.68567,
+            "0.5": 0.9607,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.6812,
+            "0.5": 0.7088,
+            "0.9": 0.7892
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      },
+      "T_fpr1": {
+        "metrics": {
+          "thr": 0.7844,
+          "benign_fpr": 0.009284420289855072,
+          "snort_fn_recovery": 0.25573770491803277,
+          "added_benign_fp": 41,
+          "snort_fn_total": 2135,
+          "snort_fn_recovered": 546
+        },
+        "threshold": 0.7844,
+        "counts": {
+          "fn_low": 1589,
+          "fn_high": 546,
+          "benign_fp": 41,
+          "benign_nonalert_total": 4416
+        },
+        "score_quantiles": {
+          "fn_low_q": {
+            "0.1": 0.2839,
+            "0.5": 0.319,
+            "0.9": 0.7178
+          },
+          "fn_high_q": {
+            "0.1": 0.8207,
+            "0.5": 1.0,
+            "0.9": 1.0
+          },
+          "benign_fp_q": {
+            "0.1": 0.7863,
+            "0.5": 0.7977,
+            "0.9": 0.8199
+          }
+        },
+        "top_feature_counts": {
+          "fn_low_top": {},
+          "fn_high_top": {},
+          "benign_fp_top": {}
+        },
+        "numeric_profile": {
+          "fn_low": {},
+          "fn_high": {},
+          "benign_fp": {},
+          "benign_all": {}
+        }
+      }
+    }
+  }
+}
