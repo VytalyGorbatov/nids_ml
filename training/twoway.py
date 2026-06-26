@@ -150,6 +150,42 @@ class TwoWayTrainer(BaseTrainer):
         self.sched_cfg = {"factor": 0.5, "patience": 3, "min_lr": 1e-6}
         self.best_metric = str(training_cfg.get("best_metric", "pr_auc"))
 
+        # ── Stage-2 trainability controls ───────────────
+        # ``freeze_backbone`` (legacy) is kept as a backward-compatible alias:
+        # when True and no explicit ``stage2_trainable`` is given it maps to the
+        # "head" mode (heads-only updates).  An explicit ``stage2_trainable``
+        # always wins.
+        self.freeze_backbone = bool(training_cfg.get("freeze_backbone", False))
+        explicit_mode = training_cfg.get("stage2_trainable", None)
+        if explicit_mode is not None:
+            self.stage2_trainable = str(explicit_mode)
+        elif self.freeze_backbone:
+            self.stage2_trainable = "head"
+        else:
+            self.stage2_trainable = "full"
+
+        valid_modes = {"head", "head_last_block", "backbone_low_lr", "full"}
+        if self.stage2_trainable not in valid_modes:
+            raise ValueError(
+                "stage2_trainable must be one of "
+                f"{sorted(valid_modes)}; got {self.stage2_trainable!r}"
+            )
+
+        # Used only by the "backbone_low_lr" mode.
+        self.backbone_lr_scale = float(training_cfg.get("backbone_lr_scale", 0.1))
+        # Campaign flags (default off → original behaviour preserved).
+        self.save_epoch_checkpoints = bool(
+            training_cfg.get("save_epoch_checkpoints", False)
+        )
+        self.disable_early_stop = bool(training_cfg.get("disable_early_stop", False))
+        self.disable_plateau_sched = bool(
+            training_cfg.get("disable_plateau_sched", False)
+        )
+
+        # Populated by ``_setup_stage2_trainability`` at the start of train_pu.
+        self._trainable_params: list = self.all_params
+        self._frozen_modules: list = []
+
     # ── helpers ─────────────────────────────────────
 
     def _make_augmented_view(
@@ -170,10 +206,18 @@ class TwoWayTrainer(BaseTrainer):
         self.heads.load_state_dict(ckpt["heads"])
         logger.info("Loaded pretrained checkpoint from %s", path)
 
-    def _reset_optimizer(self, use_adamw: bool = True) -> None:
-        """Create a fresh optimizer + scheduler at full LR."""
+    def _reset_optimizer(self, param_groups=None, use_adamw: bool = True) -> None:
+        """Create a fresh optimizer + scheduler.
+
+        If ``param_groups`` (a list of param-group dicts) is supplied, it is
+        passed straight to the optimizer so per-group ``lr`` keys are honoured;
+        the constructor-level ``self.lr`` is then only the default for groups
+        that omit ``lr``.  When ``param_groups`` is None all model parameters
+        are optimized at ``self.lr`` (legacy behaviour, used by ``pretrain``).
+        """
+        params = param_groups if param_groups is not None else self.all_params
         self.optim = self._init_optimizer(
-            self.all_params, self.lr, self.weight_decay, use_adamw=use_adamw,
+            params, self.lr, self.weight_decay, use_adamw=use_adamw,
         )
         self.sched = self._init_scheduler(
             self.optim, self.sched_cfg, mode="max",
@@ -181,6 +225,123 @@ class TwoWayTrainer(BaseTrainer):
 
     def _do_optim_step(self, loss: torch.Tensor) -> None:
         self._optim_step(loss, self.optim, self.all_params)
+
+    # ── Stage 2 trainability / plasticity ───────────
+
+    def _setup_stage2_trainability(self) -> list:
+        """Configure ``requires_grad`` per Stage-2 mode and return param-groups.
+
+        Modes
+        -----
+        full
+            Every parameter trainable; one group at ``self.lr``.
+        head
+            Whole backbone frozen, heads trainable; one group at ``self.lr``.
+        head_last_block
+            Freeze everything except the dilation-8 (last) ResTCN block of each
+            encoder, the fusion MLP, and all heads; one group at ``self.lr``.
+        backbone_low_lr
+            All parameters trainable; two groups — backbone at
+            ``self.lr * self.backbone_lr_scale`` and heads at ``self.lr``.
+
+        Side effects
+        ------------
+        Sets ``self._trainable_params`` (flat list of params with
+        ``requires_grad=True``, used for gradient clipping) and
+        ``self._frozen_modules`` (fully-frozen ``nn.Module`` list, forced to
+        ``eval()`` each epoch by ``_set_frozen_eval``).
+        """
+        mode = self.stage2_trainable
+
+        # Start from a clean slate: everything trainable, then freeze per mode.
+        for p in self.model.parameters():
+            p.requires_grad_(True)
+
+        frozen_modules: list = []
+
+        if mode == "full":
+            param_groups = [
+                {"params": [p for p in self.model.parameters() if p.requires_grad]},
+            ]
+
+        elif mode == "head":
+            for p in self.backbone.parameters():
+                p.requires_grad_(False)
+            frozen_modules = [self.backbone]
+            param_groups = [{"params": list(self.heads.parameters())}]
+
+        elif mode == "head_last_block":
+            for p in self.backbone.parameters():
+                p.requires_grad_(False)
+            unfrozen = [
+                self.backbone.enc_h.blocks[3],
+                self.backbone.enc_b.blocks[3],
+                self.backbone.fusion,
+                self.heads,
+            ]
+            for m in unfrozen:
+                for p in m.parameters():
+                    p.requires_grad_(True)
+            # Still frozen in each encoder: emb, stem, blocks 0-2, proj.
+            frozen_modules = [
+                self.backbone.enc_h.emb,
+                self.backbone.enc_h.stem,
+                self.backbone.enc_h.blocks[0],
+                self.backbone.enc_h.blocks[1],
+                self.backbone.enc_h.blocks[2],
+                self.backbone.enc_h.proj,
+                self.backbone.enc_b.emb,
+                self.backbone.enc_b.stem,
+                self.backbone.enc_b.blocks[0],
+                self.backbone.enc_b.blocks[1],
+                self.backbone.enc_b.blocks[2],
+                self.backbone.enc_b.proj,
+            ]
+            param_groups = [
+                {"params": [p for p in self.model.parameters() if p.requires_grad]},
+            ]
+
+        elif mode == "backbone_low_lr":
+            backbone_lr = self.lr * self.backbone_lr_scale
+            param_groups = [
+                {"params": list(self.backbone.parameters()), "lr": backbone_lr},
+                {"params": list(self.heads.parameters()), "lr": self.lr},
+            ]
+            frozen_modules = []
+
+        else:  # pragma: no cover — validated in __init__
+            raise ValueError(f"Unknown stage2_trainable mode: {mode!r}")
+
+        self._frozen_modules = frozen_modules
+        self._trainable_params = [
+            p for p in self.model.parameters() if p.requires_grad
+        ]
+
+        n_trainable = sum(p.numel() for p in self._trainable_params)
+        n_frozen = sum(
+            p.numel() for p in self.model.parameters() if not p.requires_grad
+        )
+        group_lrs = [float(g.get("lr", self.lr)) for g in param_groups]
+        logger.info(
+            "Stage-2 trainability: mode=%s | %d group(s) lrs=%s | "
+            "trainable=%s params | frozen=%s params",
+            mode, len(param_groups), [f"{x:.2e}" for x in group_lrs],
+            f"{n_trainable:,}", f"{n_frozen:,}",
+        )
+        return param_groups
+
+    def _set_frozen_eval(self) -> None:
+        """Force fully-frozen submodules into ``eval()`` mode.
+
+        ``train_pu`` calls ``self.backbone.train()`` each epoch, which would
+        re-enable dropout inside frozen submodules and make their features
+        stochastic.  Putting them back into ``eval()`` keeps frozen features
+        deterministic and consistent with inference.  For the "full" and
+        "backbone_low_lr" modes ``_frozen_modules`` is empty, so this is a
+        no-op.
+        """
+        for m in getattr(self, "_frozen_modules", []):
+            m.eval()
 
     # ── Stage 1: contrastive pretraining ────────────
 
@@ -268,7 +429,8 @@ class TwoWayTrainer(BaseTrainer):
             "== Stage 2: nnPU training (%d epochs, π=%.3f) ==",
             self.max_epochs_pu, self.pi_p,
         )
-        self._reset_optimizer()
+        param_groups = self._setup_stage2_trainability()
+        self._reset_optimizer(param_groups=param_groups)
         stopper = EarlyStopper(patience=self.patience, mode="max")
         best_path = out_dir / "model_best.pt"
         best_pr_auc = -1.0
@@ -281,6 +443,9 @@ class TwoWayTrainer(BaseTrainer):
 
             self.backbone.train()
             self.heads.train()
+            # Keep fully-frozen submodules deterministic (no dropout) so their
+            # features match eval time; no-op for "full"/"backbone_low_lr".
+            self._set_frozen_eval()
             total = 0.0
             n = 0
 
@@ -332,7 +497,9 @@ class TwoWayTrainer(BaseTrainer):
 
                 # --- Single optimizer step (gradients from both passes accumulate) ---
                 if self.clip_grad:
-                    torch.nn.utils.clip_grad_norm_(self.all_params, self.clip_grad)
+                    torch.nn.utils.clip_grad_norm_(
+                        self._trainable_params, self.clip_grad,
+                    )
                 self.optim.step()
                 self.optim.zero_grad()
 
@@ -343,7 +510,20 @@ class TwoWayTrainer(BaseTrainer):
                 self.backbone, self.heads, loader_val, self.device,
             )
             metric_val = val_stats.get(self.best_metric, val_stats["pr_auc"])
-            self._step_scheduler(self.sched, metric_val)
+
+            # Per-epoch checkpoint for offline epoch-budget studies.
+            if self.save_epoch_checkpoints:
+                torch.save(
+                    {"backbone": self.backbone.state_dict(),
+                     "heads": self.heads.state_dict(),
+                     "epoch": epoch,
+                     "val_stats": val_stats},
+                    out_dir / f"model_ep{epoch}.pt",
+                )
+
+            # Plateau scheduler is optional: when disabled the LR stays constant.
+            if not self.disable_plateau_sched:
+                self._step_scheduler(self.sched, metric_val)
             lr = self.optim.param_groups[0]["lr"]
             fn_recall = val_stats.get("snort_fn_recall", 0.0)
             logger.info(
@@ -364,7 +544,8 @@ class TwoWayTrainer(BaseTrainer):
                     best_path,
                 )
 
-            if stopper.step(metric_val):
+            # Early stopping is optional: when disabled all epochs run.
+            if not self.disable_early_stop and stopper.step(metric_val):
                 logger.info("Early stopping triggered.")
                 break
 

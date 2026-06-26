@@ -139,15 +139,26 @@ def _best_fpr_threshold(
     alerted: torch.Tensor,
     budget: float,
 ) -> float:
+    # Goal: find the LOWEST threshold T* that satisfies benign_fpr <= budget.
+    # Lower T = more permissive = higher Snort-FN recovery.
+    #
+    # Algorithm: scan DESCENDING (high → low), unconditionally update best_t
+    # whenever the budget is satisfied.  Each valid update pushes best_t to a
+    # lower, more permissive value.  The final best_t is the lowest T where
+    # benign_fpr still fits the budget.
+    #
+    # The old code added a `best_recovery > prev_best_recovery` guard to avoid
+    # updating at T=max where recovery=0.  That guard is incorrect: it prevents
+    # the loop from descending past the first valid T with recovery=0 (e.g., in
+    # the isotonic staircase gap), leaving best_t stranded at 1.0.  The
+    # unconditional update is the correct approach.
     thresholds = torch.unique(scores)
-    thresholds = torch.sort(thresholds, descending=True).values
+    thresholds = torch.sort(thresholds, descending=True).values  # descending
     best_t = 1.0
-    best_recovery = -1.0
     for t in thresholds:
         s = _snort_metrics(scores, labels, alerted, float(t.item()))
-        if s["benign_fpr"] <= budget + 1e-12 and s["snort_fn_recovery"] > best_recovery:
-            best_recovery = s["snort_fn_recovery"]
-            best_t = float(t.item())
+        if s["benign_fpr"] <= budget + 1e-12:
+            best_t = float(t.item())  # push best_t lower on each valid step
     return best_t
 
 
