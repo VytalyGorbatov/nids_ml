@@ -1,6 +1,6 @@
 {
   "artifacts": {
-    "out_dir": "./artifacts/runs/phase1_stream_ip/pseudo128_long"
+    "out_dir": "./artifacts/runs/phase3_trainability/frozen_probe_ep7"
   },
   "attack_paths": {
     "test": "../sip-dataset/attack/test.json",
@@ -44,14 +44,13 @@
     "batch_size": 256,
     "best_metric": "pr_auc",
     "clip_grad": 1.0,
+    "freeze_backbone": true,
     "lr": 0.0001,
     "max_epochs_pretrain": 30,
-    "max_epochs_pu": 24,
+    "max_epochs_pu": 7,
     "num_workers": 0,
-    "patience": 6,
-    "pi_p": 0.2,
-    "pseudo_positive_manifest": "artifacts/analysis/streamip_pseudo_positive_top128_from_long_control.json",
-    "pseudo_positive_max_promoted": 128,
+    "patience": 7,
+    "pi_p": 0.25,
     "temp": 0.2,
     "w_alert": 0.2,
     "w_pu": 1.0,

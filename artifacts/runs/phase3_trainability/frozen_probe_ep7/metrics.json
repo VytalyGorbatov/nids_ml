@@ -1,0 +1,37 @@
+{
+  "best_val_metrics": {
+    "best_f1": 0.5966634154319763,
+    "best_threshold": 0.40114033222198486,
+    "pr_auc": 0.5641992092132568,
+    "precision_at_best": 0.5214408040046692,
+    "recall_at_best": 0.6972476840019226,
+    "snort_fn_count": 3239,
+    "snort_fn_f1": 0.5422740524781341,
+    "snort_fn_precision": 0.46,
+    "snort_fn_recall": 0.6603890089533807,
+    "snort_fn_recovered": 2139
+  },
+  "pretrain_val": {
+    "best_f1": 0.5436419248580933,
+    "best_threshold": 0.36753174662590027,
+    "pr_auc": 0.3940216600894928,
+    "precision_at_best": 0.374184250831604,
+    "recall_at_best": 0.993628978729248,
+    "snort_fn_count": 3239,
+    "snort_fn_f1": 0.49614791987673346,
+    "snort_fn_precision": 0.33056154398932347,
+    "snort_fn_recall": 0.9941339919728311,
+    "snort_fn_recovered": 3220
+  },
+  "test_metrics": {
+    "best_f1_sweep": 0.585301399230957,
+    "best_threshold_sweep": 0.40653401613235474,
+    "calibrator": "isotonic",
+    "f1": 0.48303934931755066,
+    "pr_auc": 0.5594985485076904,
+    "precision": 0.5916897654533386,
+    "recall": 0.4081008732318878,
+    "threshold": 0.5,
+    "val_threshold_raw": 0.40114033222198486
+  }
+}

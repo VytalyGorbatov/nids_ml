@@ -1,6 +1,6 @@
 {
   "artifacts": {
-    "out_dir": "./artifacts/runs/phase1_stream_ip/pseudo128_long"
+    "out_dir": "./artifacts/stage2_streamip_pseudo128_long"
   },
   "attack_paths": {
     "test": "../sip-dataset/attack/test.json",

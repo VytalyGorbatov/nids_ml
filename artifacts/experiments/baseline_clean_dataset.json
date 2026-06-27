@@ -1,49 +1,59 @@
 {
-  "seed": 137744799,
-  "benign_paths": {
-    "train": "../sip-dataset/benign/train.json",
-    "val": "../sip-dataset/benign/val.json",
-    "test": "../sip-dataset/benign/test.json"
+  "artifacts": {
+    "out_dir": "./artifacts/runs/phase2_pi_sweep/baseline_p020"
   },
   "attack_paths": {
+    "test": "../sip-dataset/attack/test.json",
     "train": "../sip-dataset/attack/train.json",
-    "val": "../sip-dataset/attack/val.json",
-    "test": "../sip-dataset/attack/test.json"
+    "val": "../sip-dataset/attack/val.json"
+  },
+  "benign_paths": {
+    "test": "../sip-dataset/benign/test.json",
+    "train": "../sip-dataset/benign/train.json",
+    "val": "../sip-dataset/benign/val.json"
   },
   "data": {
     "buffer_field": "buffers",
-    "fixed_len": 1024,
     "fallback_header_len": 512,
+    "fixed_len": 1024,
     "sep_byte": 30
   },
+  "model": {
+    "channels": 96,
+    "dilations": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "dropout": 0.1,
+    "embed_dim": 32,
+    "fusion_dim": 256,
+    "kernel": 5,
+    "prefix_lengths": [
+      64,
+      128,
+      256,
+      512
+    ],
+    "proj_dim": 192,
+    "type": "tcn_2way"
+  },
+  "seed": 137744799,
   "training": {
     "batch_size": 256,
-    "num_workers": 0,
+    "best_metric": "pr_auc",
+    "clip_grad": 1.0,
     "lr": 0.0001,
-    "weight_decay": 0.0001,
     "max_epochs_pretrain": 30,
     "max_epochs_pu": 24,
+    "num_workers": 0,
     "patience": 6,
-    "clip_grad": 1.0,
-    "w_ssl": 1.5,
-    "w_alert": 0.2,
-    "w_pu": 1.0,
     "pi_p": 0.2,
     "temp": 0.2,
-    "best_metric": "pr_auc"
-  },
-  "model": {
-    "type": "tcn_2way",
-    "embed_dim": 32,
-    "channels": 96,
-    "kernel": 5,
-    "dilations": [1, 2, 4, 8],
-    "dropout": 0.1,
-    "prefix_lengths": [64, 128, 256, 512],
-    "proj_dim": 192,
-    "fusion_dim": 256
-  },
-  "artifacts": {
-    "out_dir": "./artifacts/baseline_clean_dataset"
+    "w_alert": 0.2,
+    "w_pu": 1.0,
+    "w_ssl": 1.5,
+    "weight_decay": 0.0001
   }
 }
