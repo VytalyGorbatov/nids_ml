@@ -1,0 +1,39 @@
+2026-06-27 18:00:10,850 [INFO] Global seed set to 137744799
+2026-06-27 18:00:10,850 [INFO] Model type: tcn_2way | Device: cuda
+2026-06-27 18:00:11,346 [INFO] Train P (alerted=1): 3609, Train U (alerted=0): 49126
+2026-06-27 18:00:11,346 [INFO] Val: 10546, Test: 7033
+2026-06-27 18:00:11,346 [INFO] Building model type 'tcn_2way'
+2026-06-27 18:00:11,354 [INFO] Model parameters: 817,986
+2026-06-27 18:00:11,497 [INFO] Loaded pretrained checkpoint from artifacts/pretrain/epoch29.pt
+2026-06-27 18:00:14,592 [INFO] Skipping Stage 1; loaded pretrained weights.
+2026-06-27 18:00:14,592 [INFO] == Stage 2: nnPU training (7 epochs, π=0.250) ==
+2026-06-27 18:00:14,593 [INFO] Stage-2 trainability: mode=backbone_low_lr | 2 group(s) lrs=['2.00e-05', '1.00e-04'] | trainable=817,986 params | frozen=0 params
+2026-06-27 18:00:47,623 [INFO] [nnPU epoch 0] loss=2.0360 pr_auc=0.5194 bestF1=0.5535 fn_recall=0.9827 thr=0.381 lr=2.00e-05
+2026-06-27 18:01:19,365 [INFO] [nnPU epoch 1] loss=1.3060 pr_auc=0.6188 bestF1=0.5911 fn_recall=0.6777 thr=0.424 lr=2.00e-05
+2026-06-27 18:01:51,115 [INFO] [nnPU epoch 2] loss=1.0717 pr_auc=0.6675 bestF1=0.6357 fn_recall=0.7397 thr=0.379 lr=2.00e-05
+2026-06-27 18:02:22,790 [INFO] [nnPU epoch 3] loss=0.9782 pr_auc=0.6694 bestF1=0.6483 fn_recall=0.8425 thr=0.325 lr=2.00e-05
+2026-06-27 18:02:54,547 [INFO] [nnPU epoch 4] loss=0.8927 pr_auc=0.6632 bestF1=0.6566 fn_recall=0.8660 thr=0.288 lr=2.00e-05
+2026-06-27 18:03:26,331 [INFO] [nnPU epoch 5] loss=0.8085 pr_auc=0.6614 bestF1=0.6626 fn_recall=0.9188 thr=0.236 lr=2.00e-05
+2026-06-27 18:03:58,451 [INFO] [nnPU epoch 6] loss=0.7182 pr_auc=0.6473 bestF1=0.6659 fn_recall=0.9237 thr=0.194 lr=2.00e-05
+2026-06-27 18:03:58,451 [INFO] Best checkpoint: pr_auc=0.6694
+2026-06-27 18:04:02,105 [INFO] PriorCorrection: pi_train=0.1000 pi_target=0.3721 shift=1.6739
+2026-06-27 18:04:02,105 [INFO]   prior_correction log-loss: 0.90080
+2026-06-27 18:04:02,114 [INFO] Platt scaling: a=2.9204 b=1.0338
+2026-06-27 18:04:02,114 [INFO]   platt log-loss: 0.54330
+2026-06-27 18:04:02,215 [INFO] Isotonic calibration: 38 knots, range [0.0455, 1.0000]
+2026-06-27 18:04:02,216 [INFO]   isotonic log-loss: 0.53405
+2026-06-27 18:04:02,216 [INFO] Selected calibrator: isotonic (log-loss=0.53405)
+2026-06-27 18:04:04,649 [INFO] Test Metrics (calibrated, threshold=0.5):
+2026-06-27 18:04:04,649 [INFO]   threshold: 0.5000
+2026-06-27 18:04:04,649 [INFO]   f1: 0.6139
+2026-06-27 18:04:04,649 [INFO]   precision: 0.6207
+2026-06-27 18:04:04,649 [INFO]   recall: 0.6072
+2026-06-27 18:04:04,649 [INFO]   pr_auc: 0.6565
+2026-06-27 18:04:04,649 [INFO]   best_f1_sweep: 0.6400
+2026-06-27 18:04:04,649 [INFO]   best_threshold_sweep: 0.3288
+2026-06-27 18:04:04,649 [INFO]   calibrator: isotonic
+2026-06-27 18:04:04,649 [INFO]   val_threshold_raw: 0.3254
+2026-06-27 18:04:09,455 [INFO] Saved 10546 val samples to artifacts/runs/phase3_trainability/backbone_low_lr_5x_ep7/val_samples.json
+2026-06-27 18:04:09,455 [INFO] Saved 10546 val samples to artifacts/runs/phase3_trainability/backbone_low_lr_5x_ep7/val_samples.json
+2026-06-27 18:04:16,100 [INFO] Saved 7033 test samples to artifacts/runs/phase3_trainability/backbone_low_lr_5x_ep7/test_samples.json
+2026-06-27 18:04:16,100 [INFO] Saved 7033 test samples to artifacts/runs/phase3_trainability/backbone_low_lr_5x_ep7/test_samples.json

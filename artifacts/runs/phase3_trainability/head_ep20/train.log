@@ -1,0 +1,52 @@
+2026-06-27 17:37:54,892 [INFO] Global seed set to 137744799
+2026-06-27 17:37:54,892 [INFO] Model type: tcn_2way | Device: cuda
+2026-06-27 17:37:55,366 [INFO] Train P (alerted=1): 3609, Train U (alerted=0): 49126
+2026-06-27 17:37:55,366 [INFO] Val: 10546, Test: 7033
+2026-06-27 17:37:55,366 [INFO] Building model type 'tcn_2way'
+2026-06-27 17:37:55,374 [INFO] Model parameters: 817,986
+2026-06-27 17:37:55,503 [INFO] Loaded pretrained checkpoint from artifacts/pretrain/epoch29.pt
+2026-06-27 17:37:58,581 [INFO] Skipping Stage 1; loaded pretrained weights.
+2026-06-27 17:37:58,581 [INFO] == Stage 2: nnPU training (20 epochs, π=0.250) ==
+2026-06-27 17:37:58,581 [INFO] Stage-2 trainability: mode=head | 1 group(s) lrs=['1.00e-04'] | trainable=99,202 params | frozen=718,784 params
+2026-06-27 17:38:06,115 [INFO] [nnPU epoch 0] loss=2.5272 pr_auc=0.4116 bestF1=0.5445 fn_recall=0.9963 thr=0.329 lr=1.00e-04
+2026-06-27 17:38:12,608 [INFO] [nnPU epoch 1] loss=2.4144 pr_auc=0.4321 bestF1=0.5455 fn_recall=0.9855 thr=0.331 lr=1.00e-04
+2026-06-27 17:38:19,139 [INFO] [nnPU epoch 2] loss=2.3319 pr_auc=0.4548 bestF1=0.5476 fn_recall=0.9880 thr=0.299 lr=1.00e-04
+2026-06-27 17:38:25,607 [INFO] [nnPU epoch 3] loss=2.2454 pr_auc=0.4796 bestF1=0.5506 fn_recall=0.9756 thr=0.294 lr=1.00e-04
+2026-06-27 17:38:32,114 [INFO] [nnPU epoch 4] loss=2.1663 pr_auc=0.5070 bestF1=0.5617 fn_recall=0.6666 thr=0.436 lr=1.00e-04
+2026-06-27 17:38:38,877 [INFO] [nnPU epoch 5] loss=2.0872 pr_auc=0.5390 bestF1=0.5802 fn_recall=0.6554 thr=0.420 lr=1.00e-04
+2026-06-27 17:38:45,427 [INFO] [nnPU epoch 6] loss=2.0208 pr_auc=0.5683 bestF1=0.5947 fn_recall=0.6659 thr=0.393 lr=1.00e-04
+2026-06-27 17:38:51,948 [INFO] [nnPU epoch 7] loss=1.9451 pr_auc=0.5972 bestF1=0.6074 fn_recall=0.6626 thr=0.376 lr=1.00e-04
+2026-06-27 17:38:58,471 [INFO] [nnPU epoch 8] loss=1.8937 pr_auc=0.6215 bestF1=0.6206 fn_recall=0.6740 thr=0.355 lr=1.00e-04
+2026-06-27 17:39:05,004 [INFO] [nnPU epoch 9] loss=1.8099 pr_auc=0.6422 bestF1=0.6329 fn_recall=0.6913 thr=0.335 lr=1.00e-04
+2026-06-27 17:39:11,515 [INFO] [nnPU epoch 10] loss=1.7547 pr_auc=0.6595 bestF1=0.6389 fn_recall=0.6968 thr=0.322 lr=1.00e-04
+2026-06-27 17:39:18,002 [INFO] [nnPU epoch 11] loss=1.7135 pr_auc=0.6706 bestF1=0.6404 fn_recall=0.6934 thr=0.314 lr=1.00e-04
+2026-06-27 17:39:24,502 [INFO] [nnPU epoch 12] loss=1.6649 pr_auc=0.6782 bestF1=0.6408 fn_recall=0.7092 thr=0.288 lr=1.00e-04
+2026-06-27 17:39:31,007 [INFO] [nnPU epoch 13] loss=1.6023 pr_auc=0.6813 bestF1=0.6411 fn_recall=0.7138 thr=0.275 lr=1.00e-04
+2026-06-27 17:39:37,504 [INFO] [nnPU epoch 14] loss=1.5549 pr_auc=0.6840 bestF1=0.6402 fn_recall=0.6934 thr=0.282 lr=1.00e-04
+2026-06-27 17:39:44,005 [INFO] [nnPU epoch 15] loss=1.5089 pr_auc=0.6852 bestF1=0.6405 fn_recall=0.6866 thr=0.279 lr=1.00e-04
+2026-06-27 17:39:50,528 [INFO] [nnPU epoch 16] loss=1.4542 pr_auc=0.6857 bestF1=0.6400 fn_recall=0.6814 thr=0.275 lr=1.00e-04
+2026-06-27 17:39:57,006 [INFO] [nnPU epoch 17] loss=1.4060 pr_auc=0.6859 bestF1=0.6395 fn_recall=0.6746 thr=0.274 lr=1.00e-04
+2026-06-27 17:40:03,475 [INFO] [nnPU epoch 18] loss=1.3688 pr_auc=0.6867 bestF1=0.6393 fn_recall=0.6792 thr=0.261 lr=1.00e-04
+2026-06-27 17:40:09,973 [INFO] [nnPU epoch 19] loss=1.3284 pr_auc=0.6891 bestF1=0.6390 fn_recall=0.6709 thr=0.258 lr=1.00e-04
+2026-06-27 17:40:09,982 [INFO] Best checkpoint: pr_auc=0.6891
+2026-06-27 17:40:13,713 [INFO] PriorCorrection: pi_train=0.1000 pi_target=0.3721 shift=1.6739
+2026-06-27 17:40:13,713 [INFO]   prior_correction log-loss: 0.71423
+2026-06-27 17:40:13,717 [INFO] Platt scaling: a=0.9453 b=0.2632
+2026-06-27 17:40:13,717 [INFO]   platt log-loss: 0.54059
+2026-06-27 17:40:13,808 [INFO] Isotonic calibration: 34 knots, range [0.0000, 0.8824]
+2026-06-27 17:40:13,809 [INFO]   isotonic log-loss: 0.53231
+2026-06-27 17:40:13,809 [INFO] Selected calibrator: isotonic (log-loss=0.53231)
+2026-06-27 17:40:16,263 [INFO] Test Metrics (calibrated, threshold=0.5):
+2026-06-27 17:40:16,263 [INFO]   threshold: 0.5000
+2026-06-27 17:40:16,263 [INFO]   f1: 0.5738
+2026-06-27 17:40:16,263 [INFO]   precision: 0.7132
+2026-06-27 17:40:16,263 [INFO]   recall: 0.4799
+2026-06-27 17:40:16,264 [INFO]   pr_auc: 0.6837
+2026-06-27 17:40:16,264 [INFO]   best_f1_sweep: 0.6269
+2026-06-27 17:40:16,264 [INFO]   best_threshold_sweep: 0.2460
+2026-06-27 17:40:16,264 [INFO]   calibrator: isotonic
+2026-06-27 17:40:16,264 [INFO]   val_threshold_raw: 0.2584
+2026-06-27 17:40:20,965 [INFO] Saved 10546 val samples to artifacts/runs/phase3_trainability/head_ep20/val_samples.json
+2026-06-27 17:40:20,965 [INFO] Saved 10546 val samples to artifacts/runs/phase3_trainability/head_ep20/val_samples.json
+2026-06-27 17:40:24,094 [INFO] Saved 7033 test samples to artifacts/runs/phase3_trainability/head_ep20/test_samples.json
+2026-06-27 17:40:24,094 [INFO] Saved 7033 test samples to artifacts/runs/phase3_trainability/head_ep20/test_samples.json

@@ -1,0 +1,10 @@
+Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6] | budgets: [0.01, 0.05, 0.1]
+[epoch 0] test_pr_auc=0.5167 | R@1%=0.0379(fp+36), R@5%=0.1536(fp+231), R@10%=0.2337(fp+439)
+[epoch 1] test_pr_auc=0.6406 | R@1%=0.0820(fp+46), R@5%=0.2225(fp+230), R@10%=0.3541(fp+446)
+[epoch 2] test_pr_auc=0.7057 | R@1%=0.1246(fp+40), R@5%=0.2979(fp+227), R@10%=0.4248(fp+466)
+[epoch 3] test_pr_auc=0.7184 | R@1%=0.1185(fp+39), R@5%=0.3251(fp+225), R@10%=0.4122(fp+474)
+[epoch 4] test_pr_auc=0.7147 | R@1%=0.0965(fp+37), R@5%=0.3199(fp+233), R@10%=0.3883(fp+461)
+[epoch 5] test_pr_auc=0.7028 | R@1%=0.0909(fp+35), R@5%=0.2698(fp+239), R@10%=0.3616(fp+480)
+[epoch 6] test_pr_auc=0.6929 | R@1%=0.0923(fp+34), R@5%=0.2169(fp+239), R@10%=0.3251(fp+486)
+Saved /home/vhorbato/Academy/nids_ml/artifacts/runs/phase3_trainability/head_last_block_ep7/epoch_budget_matrix.json
+Saved /home/vhorbato/Academy/nids_ml/artifacts/runs/phase3_trainability/head_last_block_ep7/epoch_budget_matrix.md
