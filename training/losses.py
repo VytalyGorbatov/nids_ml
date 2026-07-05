@@ -10,7 +10,7 @@ Consolidates:
 from __future__ import annotations
 
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -70,13 +70,35 @@ def nnpu_loss(
     logit_p: torch.Tensor,
     logit_u: torch.Tensor,
     pi_p: float,
+    p_weights: Optional[torch.Tensor] = None,
 ) -> Tuple[torch.Tensor, Dict[str, float]]:
-    """nnPU risk estimator over pre-split P and U logit batches."""
+    """nnPU risk estimator over pre-split P and U logit batches.
+
+    Args:
+        logit_p: Risk logits for the positive (P) batch, shape ``[n_p]``.
+        logit_u: Risk logits for the unlabeled (U) batch, shape ``[n_u]``.
+        pi_p: Class-prior probability of a positive event.
+        p_weights: Optional per-sample weights for P samples, shape ``[n_p]``.
+            When provided, the positive risk terms are computed as a weighted
+            mean (``sum(w·l) / sum(w)``), which downweights pseudo-positive
+            samples relative to native positives.  When ``None``, falls back
+            to the standard unweighted mean.
+    """
     if not 0.0 < pi_p < 1.0:
         raise ValueError(f"pi_p must be in (0, 1), got {pi_p}")
 
-    rp_pos = logistic_loss(logit_p, torch.ones_like(logit_p)).mean()
-    rp_neg = logistic_loss(logit_p, -torch.ones_like(logit_p)).mean()
+    lp_pos = logistic_loss(logit_p, torch.ones_like(logit_p))
+    lp_neg = logistic_loss(logit_p, -torch.ones_like(logit_p))
+
+    if p_weights is not None:
+        w = p_weights.to(logit_p.device)
+        w_sum = w.sum().clamp_min(1e-8)
+        rp_pos = (lp_pos * w).sum() / w_sum
+        rp_neg = (lp_neg * w).sum() / w_sum
+    else:
+        rp_pos = lp_pos.mean()
+        rp_neg = lp_neg.mean()
+
     ru_neg = logistic_loss(logit_u, -torch.ones_like(logit_u)).mean()
 
     pos_risk = pi_p * rp_pos

@@ -124,6 +124,8 @@ class TwoWayRecordDataset(Dataset):
             "body_ids": body_ids,
             "alerted": int(r.get("alerted", 0)),
             "is_attack": int(r.get("is_attack", 0)),
+            "loss_weight": float(r.get("loss_weight", 1.0)),
+            "pseudo_positive": int(r.get("pseudo_positive", 0)),
         }
 
 
@@ -142,6 +144,8 @@ def twoway_collate_fn(
         "body_mask": body.ne(PAD_IDX),
         "alerted": torch.tensor([b["alerted"] for b in batch], dtype=torch.float32),
         "is_attack": torch.tensor([b["is_attack"] for b in batch], dtype=torch.float32),
+        "loss_weight": torch.tensor([b.get("loss_weight", 1.0) for b in batch], dtype=torch.float32),
+        "pseudo_positive": torch.tensor([b.get("pseudo_positive", 0) for b in batch], dtype=torch.long),
     }
 
 

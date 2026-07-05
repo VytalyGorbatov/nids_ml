@@ -21,11 +21,13 @@ from pathlib import Path
 from typing import Any, Dict, Set
 
 import torch
+import torch.nn.functional as F
 
 # Make the nids_ml package importable when launched as a script.
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from nids_ml.models import build_model
+from nids_ml.models.tcn_2way import PAD_IDX
 from nids_ml.training.twoway import TwoWayTrainer
 
 _LR = 1e-3
@@ -60,6 +62,35 @@ def _make_trainer(mode: str) -> TwoWayTrainer:
         "backbone_lr_scale": _SCALE,
     }
     return TwoWayTrainer(model, torch.device("cpu"), cfg)
+
+
+def _make_supervised_trainer(mode: str, target: str) -> TwoWayTrainer:
+    model = build_model(_small_config())
+    cfg: Dict[str, Any] = {
+        "lr": _LR,
+        "weight_decay": 1e-4,
+        "stage2_trainable": mode,
+        "backbone_lr_scale": _SCALE,
+        "stage2_objective": "supervised",
+        "supervised_target": target,
+    }
+    return TwoWayTrainer(model, torch.device("cpu"), cfg)
+
+
+def _synthetic_batch(batch_size: int = 4, fixed_len: int = 32) -> Dict[str, torch.Tensor]:
+    """Tiny two-way batch matching the collate schema (bytes 0..255, no PAD)."""
+    header = torch.randint(0, 256, (batch_size, fixed_len), dtype=torch.long)
+    body = torch.randint(0, 256, (batch_size, fixed_len), dtype=torch.long)
+    return {
+        "header_ids": header,
+        "body_ids": body,
+        "header_mask": header.ne(PAD_IDX),
+        "body_mask": body.ne(PAD_IDX),
+        "alerted": torch.tensor([0.0, 1.0, 0.0, 1.0]),
+        "is_attack": torch.tensor([1.0, 1.0, 0.0, 0.0]),
+        "loss_weight": torch.ones(batch_size),
+        "pseudo_positive": torch.zeros(batch_size, dtype=torch.long),
+    }
 
 
 # ─── name helpers ────────────────────────────────────
@@ -247,6 +278,97 @@ def _check_freeze_backbone_alias() -> None:
     _ok("freeze_backbone→head alias")
 
 
+# ─── supervised objective checks ─────────────────────
+
+
+def _check_supervised_default_is_pu() -> None:
+    # Backward compat: absent stage2_objective ⇒ "pu", no supervised_target.
+    model = build_model(_small_config())
+    trainer = TwoWayTrainer(model, torch.device("cpu"), {"lr": _LR})
+    assert trainer.stage2_objective == "pu", (
+        "absent stage2_objective must default to 'pu'"
+    )
+    assert trainer.supervised_target is None, (
+        "pu objective must leave supervised_target unset"
+    )
+    _ok("stage2_objective default → pu")
+
+
+def _check_supervised_step(target: str) -> None:
+    """One forward+backward of the supervised path; assert grad isolation.
+
+    Uses ``head_last_block`` so there is a real frozen/trainable split, making
+    the "only ``_trainable_params`` receive grads" assertion meaningful.
+    """
+    trainer = _make_supervised_trainer("head_last_block", target)
+    assert trainer.stage2_objective == "supervised"
+    assert trainer.supervised_target == target
+
+    param_groups = trainer._setup_stage2_trainability()
+    trainer._reset_optimizer(param_groups=param_groups)
+
+    trainer.backbone.train()
+    trainer.heads.train()
+    trainer._set_frozen_eval()
+
+    batch = _synthetic_batch()
+    z = trainer.backbone(batch)
+    out = trainer.heads(z)
+    loss = F.binary_cross_entropy_with_logits(out["risk_logit"], batch[target])
+    assert torch.isfinite(loss), f"supervised BCE loss must be finite (target={target})"
+
+    trainer.optim.zero_grad(set_to_none=True)
+    loss.backward()
+
+    trainable_ids = {id(p) for p in trainer._trainable_params}
+    got_grad = 0
+    for name, p in trainer.model.named_parameters():
+        if not p.requires_grad:
+            assert p.grad is None, (
+                f"frozen param {name} received a grad (target={target})"
+            )
+        if p.grad is not None:
+            assert id(p) in trainable_ids, (
+                f"{name} received a grad but is not in _trainable_params "
+                f"(target={target})"
+            )
+            got_grad += 1
+    assert got_grad > 0, f"no trainable param received a grad (target={target})"
+
+    # The optimizer step must run cleanly over the trainable params only.
+    torch.nn.utils.clip_grad_norm_(trainer._trainable_params, trainer.clip_grad)
+    trainer.optim.step()
+    _ok(f"supervised step target={target}")
+
+
+def _check_supervised_invalid_target() -> None:
+    # Missing target and out-of-vocab targets must both raise ValueError.
+    for bad in (None, "risk", "foo", "proj"):
+        cfg: Dict[str, Any] = {"lr": _LR, "stage2_objective": "supervised"}
+        if bad is not None:
+            cfg["supervised_target"] = bad
+        raised = False
+        try:
+            TwoWayTrainer(build_model(_small_config()), torch.device("cpu"), cfg)
+        except ValueError:
+            raised = True
+        assert raised, f"supervised_target={bad!r} should raise ValueError"
+    _ok("supervised invalid/missing target rejected")
+
+
+def _check_invalid_objective() -> None:
+    raised = False
+    try:
+        TwoWayTrainer(
+            build_model(_small_config()), torch.device("cpu"),
+            {"lr": _LR, "stage2_objective": "not_an_objective"},
+        )
+    except ValueError:
+        raised = True
+    assert raised, "invalid stage2_objective should raise ValueError"
+    _ok("invalid stage2_objective rejected")
+
+
 def main() -> None:
     print("Stage-2 trainability smoke test")
     _check_full()
@@ -256,6 +378,14 @@ def main() -> None:
     _check_invalid_mode()
     _check_freeze_backbone_alias()
     print("SMOKE OK")
+
+    print("Stage-2 supervised-objective smoke test")
+    _check_supervised_default_is_pu()
+    _check_supervised_step("alerted")
+    _check_supervised_step("is_attack")
+    _check_supervised_invalid_target()
+    _check_invalid_objective()
+    print("SUPERVISED SMOKE OK")
 
 
 if __name__ == "__main__":

@@ -164,7 +164,10 @@ class TwoWayTrainer(BaseTrainer):
         else:
             self.stage2_trainable = "full"
 
-        valid_modes = {"head", "head_last_block", "backbone_low_lr", "full"}
+        valid_modes = {
+            "head", "head_last_block", "backbone_hybrid",
+            "backbone_low_lr", "full",
+        }
         if self.stage2_trainable not in valid_modes:
             raise ValueError(
                 "stage2_trainable must be one of "
@@ -181,6 +184,37 @@ class TwoWayTrainer(BaseTrainer):
         self.disable_plateau_sched = bool(
             training_cfg.get("disable_plateau_sched", False)
         )
+
+        # ── Stage-2 objective (PU vs supervised baselines) ──────────────
+        # "pu" (default) preserves the nnPU + SSL + alert-aux multitask loop.
+        # "supervised" runs plain BCE on the risk head against a chosen target
+        # so teacher-copy (alerted) and oracle (is_attack) baselines can be
+        # trained on the SAME architecture and trainability modes as the PU
+        # method.  Absent key ⇒ "pu" ⇒ byte-for-byte the original behaviour.
+        self.stage2_objective = str(training_cfg.get("stage2_objective", "pu"))
+        valid_objectives = {"pu", "supervised"}
+        if self.stage2_objective not in valid_objectives:
+            raise ValueError(
+                "stage2_objective must be one of "
+                f"{sorted(valid_objectives)}; got {self.stage2_objective!r}"
+            )
+
+        # ``supervised_target`` is required iff the objective is supervised.
+        self.supervised_target: Optional[str] = None
+        _raw_target = training_cfg.get("supervised_target", None)
+        if self.stage2_objective == "supervised":
+            if _raw_target is None:
+                raise ValueError(
+                    "supervised_target is required when "
+                    "stage2_objective='supervised' (choose 'alerted' or "
+                    "'is_attack')"
+                )
+            self.supervised_target = str(_raw_target)
+            if self.supervised_target not in {"alerted", "is_attack"}:
+                raise ValueError(
+                    "supervised_target must be 'alerted' or 'is_attack'; "
+                    f"got {self.supervised_target!r}"
+                )
 
         # Populated by ``_setup_stage2_trainability`` at the start of train_pu.
         self._trainable_params: list = self.all_params
@@ -240,6 +274,13 @@ class TwoWayTrainer(BaseTrainer):
         head_last_block
             Freeze everything except the dilation-8 (last) ResTCN block of each
             encoder, the fusion MLP, and all heads; one group at ``self.lr``.
+        backbone_hybrid
+            Freeze emb/stem/blocks[0:2]/proj of each encoder (SSL-pretrained
+            dilation-1/2 features preserved) and unfreeze blocks[2]+blocks[3]
+            (dilation-4 and dilation-8) of each encoder, the fusion MLP, and
+            all heads; one group at ``self.lr``.  Gives ~2 extra TCN blocks of
+            capacity beyond head_last_block to separate REGISTER/INVITE score
+            regions while keeping early SSL features intact.
         backbone_low_lr
             All parameters trainable; two groups — backbone at
             ``self.lr * self.backbone_lr_scale`` and heads at ``self.lr``.
@@ -295,6 +336,30 @@ class TwoWayTrainer(BaseTrainer):
                 self.backbone.enc_b.blocks[0],
                 self.backbone.enc_b.blocks[1],
                 self.backbone.enc_b.blocks[2],
+                self.backbone.enc_b.proj,
+            ]
+            param_groups = [
+                {"params": [p for p in self.model.parameters() if p.requires_grad]},
+            ]
+
+        elif mode == "backbone_hybrid":
+            for p in self.backbone.parameters():
+                p.requires_grad_(False)
+            unfrozen = [
+                self.backbone.enc_h.blocks[2], self.backbone.enc_h.blocks[3],
+                self.backbone.enc_b.blocks[2], self.backbone.enc_b.blocks[3],
+                self.backbone.fusion, self.heads,
+            ]
+            for m in unfrozen:
+                for p in m.parameters():
+                    p.requires_grad_(True)
+            # Frozen: emb, stem, blocks[0:2], proj in each encoder (SSL kept).
+            frozen_modules = [
+                self.backbone.enc_h.emb, self.backbone.enc_h.stem,
+                self.backbone.enc_h.blocks[0], self.backbone.enc_h.blocks[1],
+                self.backbone.enc_h.proj,
+                self.backbone.enc_b.emb, self.backbone.enc_b.stem,
+                self.backbone.enc_b.blocks[0], self.backbone.enc_b.blocks[1],
                 self.backbone.enc_b.proj,
             ]
             param_groups = [
@@ -470,6 +535,7 @@ class TwoWayTrainer(BaseTrainer):
 
                 loss_pu, _ = nnpu_loss(
                     out_p["risk_logit"], out_u["risk_logit"], pi_p=self.pi_p,
+                    p_weights=batch_p.get("loss_weight"),
                 )
                 loss_alert = (
                     F.binary_cross_entropy_with_logits(
@@ -528,6 +594,141 @@ class TwoWayTrainer(BaseTrainer):
             fn_recall = val_stats.get("snort_fn_recall", 0.0)
             logger.info(
                 "[nnPU epoch %d] loss=%.4f %s=%.4f bestF1=%.4f "
+                "fn_recall=%.4f thr=%.3f lr=%.2e",
+                epoch, total / max(1, n), self.best_metric, metric_val,
+                val_stats["best_f1"], fn_recall,
+                val_stats["best_threshold"], lr,
+            )
+
+            if metric_val > best_pr_auc:
+                best_pr_auc = metric_val
+                best_val = val_stats
+                torch.save(
+                    {"backbone": self.backbone.state_dict(),
+                     "heads": self.heads.state_dict(),
+                     "best_val": val_stats},
+                    best_path,
+                )
+
+            # Early stopping is optional: when disabled all epochs run.
+            if not self.disable_early_stop and stopper.step(metric_val):
+                logger.info("Early stopping triggered.")
+                break
+
+        logger.info("Best checkpoint: %s=%.4f", self.best_metric, best_pr_auc)
+        torch.save(
+            {"backbone": self.backbone.state_dict(),
+             "heads": self.heads.state_dict()},
+            out_dir / "model_last.pt",
+        )
+        return best_val, best_path
+
+    # ── Stage 2 (baseline): supervised BCE on the risk head ─────────
+
+    def train_supervised(
+        self,
+        loader_train: DataLoader,
+        loader_val: DataLoader,
+        out_dir: Path,
+        stop_flag: Optional[Callable[[], bool]] = None,
+    ) -> Tuple[Dict[str, float], Path]:
+        """Fully-supervised BCE baseline on the risk head.
+
+        Trains ``heads.risk`` with plain ``BCEWithLogitsLoss`` against
+        ``batch[self.supervised_target]`` (``alerted`` → teacher-copy of Snort,
+        ``is_attack`` → oracle upper bound).  There is NO nnPU term, NO SSL
+        regulariser, NO alert-aux term, and NO P/U pairing — a single pass over
+        one labelled loader per epoch.
+
+        Everything else mirrors :meth:`train_pu` exactly so the two objectives
+        are directly comparable: the same ``_setup_stage2_trainability`` /
+        ``_reset_optimizer`` path (so ``head_last_block`` etc. behave
+        identically), the same ``best_metric`` checkpointing to
+        ``model_best.pt``, the same per-epoch ``model_ep{e}.pt`` gating,
+        the same ``disable_early_stop`` / ``disable_plateau_sched`` handling,
+        and ``model_last.pt`` at the end.  Evaluation reuses
+        :func:`eval_on_loader` (risk-head metrics vs ``is_attack``) unchanged,
+        so checkpoint selection is on the same footing for every run.
+
+        Returns ``(best_val, best_path)`` — identical contract to ``train_pu``.
+        """
+        assert self.supervised_target in {"alerted", "is_attack"}, (
+            "train_supervised requires supervised_target in {'alerted', "
+            f"'is_attack'}}; got {self.supervised_target!r}"
+        )
+        logger.info(
+            "== Stage 2: supervised BCE training (%d epochs, target=%s) ==",
+            self.max_epochs_pu, self.supervised_target,
+        )
+        param_groups = self._setup_stage2_trainability()
+        self._reset_optimizer(param_groups=param_groups)
+        stopper = EarlyStopper(patience=self.patience, mode="max")
+        best_path = out_dir / "model_best.pt"
+        best_pr_auc = -1.0
+        best_val: Dict[str, float] = {}
+
+        for epoch in range(self.max_epochs_pu):
+            if stop_flag and stop_flag():
+                logger.info("Stop signal; exiting supervised training.")
+                break
+
+            self.backbone.train()
+            self.heads.train()
+            # Keep fully-frozen submodules deterministic (no dropout); no-op for
+            # "full"/"backbone_low_lr".
+            self._set_frozen_eval()
+            total = 0.0
+            n = 0
+
+            for batch in loader_train:
+                if stop_flag and stop_flag():
+                    break
+                batch = to_device(batch, self.device)
+
+                z = self.backbone(batch)
+                out = self.heads(z)
+                loss = F.binary_cross_entropy_with_logits(
+                    out["risk_logit"], batch[self.supervised_target],
+                )
+
+                self.optim.zero_grad(set_to_none=True)
+                if torch.isfinite(loss):
+                    loss.backward()
+                    if self.clip_grad:
+                        torch.nn.utils.clip_grad_norm_(
+                            self._trainable_params, self.clip_grad,
+                        )
+                    self.optim.step()
+                else:
+                    logger.warning(
+                        "Non-finite supervised loss; skipping optimizer step."
+                    )
+
+                total += float(loss.detach())
+                n += 1
+
+            val_stats = eval_on_loader(
+                self.backbone, self.heads, loader_val, self.device,
+            )
+            metric_val = val_stats.get(self.best_metric, val_stats["pr_auc"])
+
+            # Per-epoch checkpoint for offline epoch-budget studies.
+            if self.save_epoch_checkpoints:
+                torch.save(
+                    {"backbone": self.backbone.state_dict(),
+                     "heads": self.heads.state_dict(),
+                     "epoch": epoch,
+                     "val_stats": val_stats},
+                    out_dir / f"model_ep{epoch}.pt",
+                )
+
+            # Plateau scheduler is optional: when disabled the LR stays constant.
+            if not self.disable_plateau_sched:
+                self._step_scheduler(self.sched, metric_val)
+            lr = self.optim.param_groups[0]["lr"]
+            fn_recall = val_stats.get("snort_fn_recall", 0.0)
+            logger.info(
+                "[supervised epoch %d] loss=%.4f %s=%.4f bestF1=%.4f "
                 "fn_recall=%.4f thr=%.3f lr=%.2e",
                 epoch, total / max(1, n), self.best_metric, metric_val,
                 val_stats["best_f1"], fn_recall,

@@ -64,10 +64,22 @@ class TwoWayPipeline:
                 loaders["train_u"], loaders["val"], out_dir, stop_flag=stop_flag,
             )
 
-        best_val, best_path = trainer.train_pu(
-            loaders["train_p"], loaders["train_u"], loaders["val"],
-            out_dir, stop_flag=stop_flag,
-        )
+        # Stage 2 objective: nnPU (default) or a fully-supervised BCE baseline
+        # (teacher-copy on ``alerted`` / oracle on ``is_attack``).  The
+        # supervised path shares the SAME architecture, the SAME Stage-1 SSL
+        # backbone (still loaded via ``--pretrained``), and the SAME
+        # trainability modes; only the objective and train loader differ.
+        stage2_objective = str(training_cfg.get("stage2_objective", "pu"))
+        if stage2_objective == "supervised":
+            train_all = builder.build_supervised_loader()
+            best_val, best_path = trainer.train_supervised(
+                train_all, loaders["val"], out_dir, stop_flag=stop_flag,
+            )
+        else:
+            best_val, best_path = trainer.train_pu(
+                loaders["train_p"], loaders["train_u"], loaders["val"],
+                out_dir, stop_flag=stop_flag,
+            )
 
         # 4. Load best checkpoint and calibrate
         if best_path.exists():
