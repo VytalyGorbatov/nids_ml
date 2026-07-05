@@ -1,0 +1,44 @@
+2026-07-05 18:29:50,666 [INFO] Global seed set to 137744799
+2026-07-05 18:29:50,667 [INFO] Model type: tcn_2way | Device: cuda
+2026-07-05 18:29:51,152 [INFO] Train P (alerted=1): 3609, Train U (alerted=0): 49126
+2026-07-05 18:29:51,152 [INFO] Val: 10546, Test: 7033
+2026-07-05 18:29:51,153 [INFO] Building model type 'tcn_2way'
+2026-07-05 18:29:51,161 [INFO] Model parameters: 817,986
+2026-07-05 18:29:51,274 [INFO] == Stage 1: contrastive pretraining (0 epochs) ==
+2026-07-05 18:29:51,748 [INFO] == Stage 2: nnPU training (20 epochs, π=0.250) ==
+2026-07-05 18:29:51,749 [INFO] Stage-2 trainability: mode=full | 1 group(s) lrs=['1.00e-04'] | trainable=817,986 params | frozen=0 params
+2026-07-05 18:30:24,651 [INFO] [nnPU epoch 0] loss=1.5984 pr_auc=0.5400 bestF1=0.5540 fn_recall=0.9515 thr=0.207 lr=1.00e-04
+2026-07-05 18:30:56,082 [INFO] [nnPU epoch 1] loss=1.5190 pr_auc=0.5579 bestF1=0.5712 fn_recall=0.9491 thr=0.175 lr=1.00e-04
+2026-07-05 18:31:27,502 [INFO] [nnPU epoch 2] loss=1.4475 pr_auc=0.6980 bestF1=0.6880 fn_recall=0.6663 thr=0.307 lr=1.00e-04
+2026-07-05 18:31:58,929 [INFO] [nnPU epoch 3] loss=1.0603 pr_auc=0.6864 bestF1=0.6772 fn_recall=0.6842 thr=0.361 lr=1.00e-04
+2026-07-05 18:32:30,400 [INFO] [nnPU epoch 4] loss=0.8229 pr_auc=0.7125 bestF1=0.7087 fn_recall=0.6768 thr=0.360 lr=1.00e-04
+2026-07-05 18:33:01,832 [INFO] [nnPU epoch 5] loss=0.7519 pr_auc=0.7283 bestF1=0.6927 fn_recall=0.6499 thr=0.461 lr=1.00e-04
+2026-07-05 18:33:33,297 [INFO] [nnPU epoch 6] loss=0.7111 pr_auc=0.7265 bestF1=0.6734 fn_recall=0.6768 thr=0.336 lr=1.00e-04
+2026-07-05 18:34:04,718 [INFO] [nnPU epoch 7] loss=0.6920 pr_auc=0.7244 bestF1=0.6655 fn_recall=0.6703 thr=0.352 lr=1.00e-04
+2026-07-05 18:34:36,191 [INFO] [nnPU epoch 8] loss=0.6682 pr_auc=0.7246 bestF1=0.6763 fn_recall=0.9420 thr=0.143 lr=1.00e-04
+2026-07-05 18:35:07,617 [INFO] [nnPU epoch 9] loss=0.6434 pr_auc=0.7247 bestF1=0.6981 fn_recall=0.9188 thr=0.176 lr=1.00e-04
+2026-07-05 18:35:39,051 [INFO] [nnPU epoch 10] loss=0.6249 pr_auc=0.7181 bestF1=0.7063 fn_recall=0.9068 thr=0.224 lr=1.00e-04
+2026-07-05 18:36:10,515 [INFO] [nnPU epoch 11] loss=0.6023 pr_auc=0.7161 bestF1=0.7030 fn_recall=0.9031 thr=0.181 lr=1.00e-04
+2026-07-05 18:36:10,515 [INFO] Early stopping triggered.
+2026-07-05 18:36:10,515 [INFO] Best checkpoint: pr_auc=0.7283
+2026-07-05 18:36:14,072 [INFO] PriorCorrection: pi_train=0.1000 pi_target=0.3721 shift=1.6739
+2026-07-05 18:36:14,072 [INFO]   prior_correction log-loss: 0.96560
+2026-07-05 18:36:14,077 [INFO] Platt scaling: a=0.3412 b=-0.5547
+2026-07-05 18:36:14,077 [INFO]   platt log-loss: 0.53239
+2026-07-05 18:36:14,173 [INFO] Isotonic calibration: 22 knots, range [0.0000, 1.0000]
+2026-07-05 18:36:14,174 [INFO]   isotonic log-loss: 0.48437
+2026-07-05 18:36:14,174 [INFO] Selected calibrator: isotonic (log-loss=0.48437)
+2026-07-05 18:36:16,523 [INFO] Test Metrics (calibrated, threshold=0.5):
+2026-07-05 18:36:16,523 [INFO]   threshold: 0.5000
+2026-07-05 18:36:16,523 [INFO]   f1: 0.6844
+2026-07-05 18:36:16,523 [INFO]   precision: 0.6652
+2026-07-05 18:36:16,523 [INFO]   recall: 0.7046
+2026-07-05 18:36:16,523 [INFO]   pr_auc: 0.7213
+2026-07-05 18:36:16,523 [INFO]   best_f1_sweep: 0.6860
+2026-07-05 18:36:16,523 [INFO]   best_threshold_sweep: 0.4480
+2026-07-05 18:36:16,523 [INFO]   calibrator: isotonic
+2026-07-05 18:36:16,523 [INFO]   val_threshold_raw: 0.4608
+2026-07-05 18:36:21,148 [INFO] Saved 10546 val samples to artifacts/article_1/runs/scratch_full_pu/val_samples.json
+2026-07-05 18:36:21,148 [INFO] Saved 10546 val samples to artifacts/article_1/runs/scratch_full_pu/val_samples.json
+2026-07-05 18:36:24,193 [INFO] Saved 7033 test samples to artifacts/article_1/runs/scratch_full_pu/test_samples.json
+2026-07-05 18:36:24,194 [INFO] Saved 7033 test samples to artifacts/article_1/runs/scratch_full_pu/test_samples.json
