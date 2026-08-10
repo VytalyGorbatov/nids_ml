@@ -28,7 +28,9 @@ PKG_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"     # .../nids_ml
 WS_ROOT="$(cd "$PKG_DIR/.." && pwd)"           # .../NeuralNetworks
 
 PYTHON_BIN="/Users/vhorbato/.venv/bin/python"
-PRETRAIN="artifacts/pretrain/epoch29.pt"       # relative to PKG_DIR
+PRETRAIN_CFG="artifacts/article_1/configs/pretrain_uonly_ssl.json"
+PRETRAIN_DIR="artifacts/article_1/pretrain"
+PRETRAIN=""
 CFG_DIR="artifacts/article_1/configs"          # relative to PKG_DIR
 RUNS_DIR="artifacts/article_1/runs"            # relative to PKG_DIR
 BUDGETS="0.01,0.05,0.10"
@@ -42,10 +44,42 @@ RUNS=(
   "scratch_full_pu:0"
 )
 
-if [[ ! -f "$PKG_DIR/$PRETRAIN" ]]; then
-  echo "ERROR: pretrained checkpoint not found: $PKG_DIR/$PRETRAIN"
+# ─── Stage 1: shared U-only contrastive pretraining ────────────────────────
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║ Stage 1  Shared U-only SSL pretraining (30 epochs)             ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
+PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
+( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
+    --config "$PRETRAIN_CFG" \
+    --device mps ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
+pretrain_rc=${PIPESTATUS[0]}
+
+if [[ $pretrain_rc -ne 0 ]]; then
+  rm -f "$PRETRAIN_MARKER"
+  echo "ERROR: Stage-1 pretraining failed (rc=$pretrain_rc)"
+  exit "$pretrain_rc"
+fi
+
+pretrain_epoch=-1
+for checkpoint in "$PKG_DIR/$PRETRAIN_DIR"/pretrain_epoch*.pt; do
+  [[ -f "$checkpoint" ]] || continue
+  [[ "$checkpoint" -nt "$PRETRAIN_MARKER" ]] || continue
+  epoch="${checkpoint##*pretrain_epoch}"
+  epoch="${epoch%.pt}"
+  [[ "$epoch" =~ ^[0-9]+$ ]] || continue
+  if (( 10#$epoch > pretrain_epoch )); then
+    pretrain_epoch=$((10#$epoch))
+    PRETRAIN="${checkpoint#"$PKG_DIR/"}"
+  fi
+done
+rm -f "$PRETRAIN_MARKER"
+
+if [[ -z "$PRETRAIN" ]]; then
+  echo "ERROR: no new pretrained checkpoint found in $PKG_DIR/$PRETRAIN_DIR"
   exit 1
 fi
+echo "Using latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
 
 # ─── B0: Snort anchor (computed, no training) ───────────────────────────────
 echo "╔══════════════════════════════════════════════════════════════╗"

@@ -35,7 +35,7 @@
     "best_metric": "pr_auc",
     "clip_grad": 1.0,
     "lr": 0.0001,
-    "max_epochs_pretrain": 8,
+    "max_epochs_pretrain": 0,
     "max_epochs_pu": 8,
     "num_workers": 0,
     "patience": 3,

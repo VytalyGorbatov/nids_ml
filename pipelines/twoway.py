@@ -64,6 +64,11 @@ class TwoWayPipeline:
                 loaders["train_u"], loaders["val"], out_dir, stop_flag=stop_flag,
             )
 
+        if bool(training_cfg.get("pretrain_only", False)):
+            self._dump_results(out_dir, pretrain_stats, {}, {})
+            logger.info("Stage 1 complete; pretrain_only skips Stage 2.")
+            return {}, pretrain_stats, {}
+
         # Stage 2 objective: nnPU (default) or a fully-supervised BCE baseline
         # (teacher-copy on ``alerted`` / oracle on ``is_attack``).  The
         # supervised path shares the SAME architecture, the SAME Stage-1 SSL
