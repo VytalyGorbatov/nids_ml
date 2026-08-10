@@ -14,15 +14,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-try:
-    from nids_ml.pipelines import ClassifierPipeline, TwoWayPipeline
-    from nids_ml.utils import DataUtils, set_global_seed
-except ModuleNotFoundError:
-    # Running as a plain script: add the parent of this package to sys.path
-    # so that `nids_ml` becomes importable as a package.
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from nids_ml.pipelines import ClassifierPipeline, TwoWayPipeline
-    from nids_ml.utils import DataUtils, set_global_seed
+_repo_root = str(Path(__file__).resolve().parents[1])
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
+
+from nids_ml.pipelines import ClassifierPipeline, TwoWayPipeline
+from nids_ml.utils import DataUtils, set_global_seed
 
 
 def _load_config(config_path: Path) -> Dict[str, Any]:
