@@ -1,0 +1,11 @@
+Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6, 7] | budgets: [0.01, 0.05, 0.1]
+[epoch 0] test_pr_auc=0.8550 | R@1%=0.6566(fp+35), R@5%=0.7433(fp+2755), R@10%=0.7615(fp+3012)
+[epoch 1] test_pr_auc=0.7621 | R@1%=0.7255(fp+601), R@5%=0.7639(fp+3074), R@10%=0.7639(fp+3661)
+[epoch 2] test_pr_auc=0.7080 | R@1%=0.7276(fp+611), R@5%=0.7639(fp+2686), R@10%=0.7639(fp+4048)
+[epoch 3] test_pr_auc=0.7032 | R@1%=0.7076(fp+435), R@5%=0.7639(fp+2197), R@10%=0.7639(fp+4130)
+[epoch 4] test_pr_auc=0.6792 | R@1%=0.6890(fp+459), R@5%=0.7639(fp+2122), R@10%=0.7639(fp+3180)
+[epoch 5] test_pr_auc=0.6858 | R@1%=0.6178(fp+403), R@5%=0.7639(fp+2049), R@10%=0.7639(fp+2817)
+[epoch 6] test_pr_auc=0.6776 | R@1%=0.5950(fp+466), R@5%=0.7639(fp+2008), R@10%=0.7639(fp+2616)
+[epoch 7] test_pr_auc=0.6777 | R@1%=0.5592(fp+549), R@5%=0.7639(fp+1918), R@10%=0.7639(fp+2408)
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/teacher_copy_alerted/epoch_budget_matrix.json
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/teacher_copy_alerted/epoch_budget_matrix.md

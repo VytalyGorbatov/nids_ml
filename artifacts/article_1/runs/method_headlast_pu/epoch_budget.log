@@ -1,0 +1,10 @@
+Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6] | budgets: [0.01, 0.05, 0.1]
+[epoch 0] test_pr_auc=0.6259 | R@1%=0.1873(fp+78), R@5%=0.2949(fp+262), R@10%=0.3820(fp+702)
+[epoch 1] test_pr_auc=0.7513 | R@1%=0.3506(fp+235), R@5%=0.4681(fp+349), R@10%=0.5471(fp+531)
+[epoch 2] test_pr_auc=0.8156 | R@1%=0.3498(fp+274), R@5%=0.6247(fp+421), R@10%=0.7033(fp+503)
+[epoch 3] test_pr_auc=0.8426 | R@1%=0.2890(fp+295), R@5%=0.7724(fp+525), R@10%=0.8290(fp+666)
+[epoch 4] test_pr_auc=0.8587 | R@1%=0.2833(fp+282), R@5%=0.8432(fp+621), R@10%=0.8800(fp+820)
+[epoch 5] test_pr_auc=0.8695 | R@1%=0.2892(fp+296), R@5%=0.8890(fp+874), R@10%=0.9139(fp+1107)
+[epoch 6] test_pr_auc=0.8704 | R@1%=0.2914(fp+288), R@5%=0.9107(fp+1013), R@10%=0.9369(fp+1311)
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/method_headlast_pu/epoch_budget_matrix.json
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/method_headlast_pu/epoch_budget_matrix.md

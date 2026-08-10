@@ -1,0 +1,38 @@
+2026-08-10 16:30:01,597 [INFO] Global seed set to 137744799
+2026-08-10 16:30:01,597 [INFO] Model type: tcn_2way | Device: cuda
+2026-08-10 16:30:02,708 [INFO] Train P (alerted=1): 4916, Train U (alerted=0): 78531
+2026-08-10 16:30:02,708 [INFO] Val: 29375, Test: 24274
+2026-08-10 16:30:02,709 [INFO] Building model type 'tcn_2way'
+2026-08-10 16:30:02,718 [INFO] Model parameters: 817,986
+2026-08-10 16:30:02,833 [INFO] == Stage 1: contrastive pretraining (30 epochs) ==
+2026-08-10 16:35:20,461 [INFO] [pretrain epoch 0] loss=6.2803 val_pr_auc=0.1328 bestF1=0.3316 lr=1.00e-04
+2026-08-10 16:40:36,441 [INFO] [pretrain epoch 1] loss=4.3142 val_pr_auc=0.1408 bestF1=0.3316 lr=1.00e-04
+2026-08-10 16:45:52,195 [INFO] [pretrain epoch 2] loss=3.9244 val_pr_auc=0.1433 bestF1=0.3316 lr=1.00e-04
+2026-08-10 16:51:07,984 [INFO] [pretrain epoch 3] loss=3.6098 val_pr_auc=0.1283 bestF1=0.3316 lr=1.00e-04
+2026-08-10 16:56:23,807 [INFO] [pretrain epoch 4] loss=3.3925 val_pr_auc=0.1382 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:01:39,718 [INFO] [pretrain epoch 5] loss=3.2512 val_pr_auc=0.1391 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:06:55,628 [INFO] [pretrain epoch 6] loss=3.1530 val_pr_auc=0.1369 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:12:11,412 [INFO] [pretrain epoch 7] loss=3.0831 val_pr_auc=0.1419 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:17:27,266 [INFO] [pretrain epoch 8] loss=3.0341 val_pr_auc=0.1399 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:22:42,998 [INFO] [pretrain epoch 9] loss=2.9949 val_pr_auc=0.1439 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:27:59,014 [INFO] [pretrain epoch 10] loss=2.9641 val_pr_auc=0.1483 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:33:14,948 [INFO] [pretrain epoch 11] loss=2.9327 val_pr_auc=0.1452 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:38:30,715 [INFO] [pretrain epoch 12] loss=2.9060 val_pr_auc=0.1523 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:43:46,871 [INFO] [pretrain epoch 13] loss=2.8791 val_pr_auc=0.1503 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:49:02,613 [INFO] [pretrain epoch 14] loss=2.8565 val_pr_auc=0.1583 bestF1=0.3316 lr=1.00e-04
+2026-08-10 17:54:18,718 [INFO] [pretrain epoch 15] loss=2.8378 val_pr_auc=0.1667 bestF1=0.3320 lr=1.00e-04
+2026-08-10 17:59:34,524 [INFO] [pretrain epoch 16] loss=2.8182 val_pr_auc=0.1664 bestF1=0.3326 lr=1.00e-04
+2026-08-10 18:04:50,230 [INFO] [pretrain epoch 17] loss=2.7971 val_pr_auc=0.1720 bestF1=0.3328 lr=1.00e-04
+2026-08-10 18:10:05,947 [INFO] [pretrain epoch 18] loss=2.7784 val_pr_auc=0.1767 bestF1=0.3340 lr=1.00e-04
+2026-08-10 18:15:21,709 [INFO] [pretrain epoch 19] loss=2.7651 val_pr_auc=0.1746 bestF1=0.3342 lr=1.00e-04
+2026-08-10 18:20:37,937 [INFO] [pretrain epoch 20] loss=2.7508 val_pr_auc=0.1779 bestF1=0.3350 lr=1.00e-04
+2026-08-10 18:25:54,078 [INFO] [pretrain epoch 21] loss=2.7350 val_pr_auc=0.1844 bestF1=0.3372 lr=1.00e-04
+2026-08-10 18:31:10,142 [INFO] [pretrain epoch 22] loss=2.7203 val_pr_auc=0.1880 bestF1=0.3377 lr=1.00e-04
+2026-08-10 18:36:25,839 [INFO] [pretrain epoch 23] loss=2.7075 val_pr_auc=0.1929 bestF1=0.3388 lr=1.00e-04
+2026-08-10 18:41:41,612 [INFO] [pretrain epoch 24] loss=2.6939 val_pr_auc=0.1958 bestF1=0.3409 lr=1.00e-04
+2026-08-10 18:46:57,446 [INFO] [pretrain epoch 25] loss=2.6839 val_pr_auc=0.2092 bestF1=0.3422 lr=1.00e-04
+2026-08-10 18:52:13,323 [INFO] [pretrain epoch 26] loss=2.6719 val_pr_auc=0.2159 bestF1=0.3469 lr=1.00e-04
+2026-08-10 18:57:28,774 [INFO] [pretrain epoch 27] loss=2.6568 val_pr_auc=0.2163 bestF1=0.3481 lr=1.00e-04
+2026-08-10 19:02:44,109 [INFO] [pretrain epoch 28] loss=2.6471 val_pr_auc=0.2315 bestF1=0.3479 lr=1.00e-04
+2026-08-10 19:07:59,921 [INFO] [pretrain epoch 29] loss=2.6346 val_pr_auc=0.2258 bestF1=0.3502 lr=1.00e-04
+2026-08-10 19:07:59,930 [INFO] Stage 1 complete; pretrain_only skips Stage 2.
