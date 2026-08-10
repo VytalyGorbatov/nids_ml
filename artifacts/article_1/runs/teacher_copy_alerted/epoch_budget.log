@@ -1,8 +1,0 @@
-Device: cuda | epochs: [0, 1, 2, 3, 4] | budgets: [0.01, 0.05, 0.1]
-[epoch 0] test_pr_auc=0.6930 | R@1%=0.0501(fp+38), R@5%=0.1883(fp+223), R@10%=0.2370(fp+484)
-[epoch 1] test_pr_auc=0.6881 | R@1%=0.0061(fp+40), R@5%=0.1649(fp+251), R@10%=0.2581(fp+475)
-[epoch 2] test_pr_auc=0.6680 | R@1%=0.0037(fp+38), R@5%=0.1326(fp+235), R@10%=0.2112(fp+451)
-[epoch 3] test_pr_auc=0.6611 | R@1%=0.0117(fp+48), R@5%=0.1185(fp+228), R@10%=0.1813(fp+464)
-[epoch 4] test_pr_auc=0.6584 | R@1%=0.0098(fp+52), R@5%=0.1054(fp+241), R@10%=0.1653(fp+464)
-Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/teacher_copy_alerted/epoch_budget_matrix.json
-Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/teacher_copy_alerted/epoch_budget_matrix.md

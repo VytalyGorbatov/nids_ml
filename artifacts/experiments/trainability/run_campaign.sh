@@ -17,10 +17,10 @@
 set -uo pipefail
 
 # ─── Configuration ─────────────────────────────────────
-ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-cd "$ROOT_DIR"
+# ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+# cd "$ROOT_DIR"
 
-PYTHON_BIN="/Users/vhorbato/.venv/bin/python"
+PYTHON_BIN="/home/vhorbato/.pyvenv/bin/python"
 PRETRAIN="artifacts/pretrain/epoch29.pt"
 CFG_DIR="artifacts/experiments/trainability"
 BUDGETS="0.01,0.05,0.10"
@@ -78,22 +78,21 @@ for cfg in "${CONFIGS[@]}"; do
 
   start_ts=$(date +%s)
 
-  # ── Training ──
-  "$PYTHON_BIN" classifier_creator.py \
-    --config "$cfg" \
-    --pretrained "$PRETRAIN" \
-    --device mps 2>&1 | tee "${run_dir}/train.log"
-  train_rc=${PIPESTATUS[0]}
+  # # ── Training ──
+  # "$PYTHON_BIN" classifier_creator.py \
+  #   --config "$cfg" \
+  #   --pretrained "$PRETRAIN" 2>&1 | tee "${run_dir}/train.log"
+  # train_rc=${PIPESTATUS[0]}
 
-  if [[ $train_rc -ne 0 ]]; then
-    echo "[FAIL] Training failed for $name (rc=$train_rc)"
-    RESULTS+=("FAIL  $name: training error (rc=$train_rc)")
-    ((FAILED++))
-    continue
-  fi
+  # if [[ $train_rc -ne 0 ]]; then
+  #   echo "[FAIL] Training failed for $name (rc=$train_rc)"
+  #   RESULTS+=("FAIL  $name: training error (rc=$train_rc)")
+  #   ((FAILED++))
+  #   continue
+  # fi
 
   # ── Offline epoch-budget evaluation ──
-  "$PYTHON_BIN" -m nids_ml.artifacts.processors.epoch_budget_campaign \
+  "$PYTHON_BIN" ./artifacts/processors/epoch_budget_campaign.py \
     --run-dir "$run_dir" \
     --budgets "$BUDGETS" 2>&1 | tee "${run_dir}/epoch_budget.log"
   driver_rc=${PIPESTATUS[0]}

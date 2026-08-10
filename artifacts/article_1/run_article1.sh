@@ -17,7 +17,7 @@
 #
 # Comparisons: B0→B2→M3→B3 (headline) | M3 vs M1 (trainability) | M1 vs A1 (SSL pretraining)
 #
-# MPS stability: runs sequentially, one at a time, foreground.
+# cuda stability: runs sequentially, one at a time, foreground.
 # Usage:  bash nids_ml/artifacts/article_1/run_article1.sh
 # ────────────────────────────────────────────────────────────────────────────
 set -uo pipefail
@@ -27,7 +27,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PKG_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"     # .../nids_ml
 WS_ROOT="$(cd "$PKG_DIR/.." && pwd)"           # .../NeuralNetworks
 
-PYTHON_BIN="/Users/vhorbato/.venv/bin/python"
+PYTHON_BIN="/home/vhorbato/.pyvenv/bin/python3"  # full path to python binary (must have torch, sklearn, etc.)
 PRETRAIN_CFG="artifacts/article_1/configs/pretrain_uonly_ssl.json"
 PRETRAIN_DIR="artifacts/article_1/pretrain"
 PRETRAIN=""
@@ -52,7 +52,7 @@ mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
 PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
 ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
     --config "$PRETRAIN_CFG" \
-    --device mps ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
+    --device cuda ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
 pretrain_rc=${PIPESTATUS[0]}
 
 if [[ $pretrain_rc -ne 0 ]]; then
@@ -135,7 +135,7 @@ for entry in "${RUNS[@]}"; do
   ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
       --config "$CFG_DIR/$name.json" \
       "${pt_args[@]}" \
-      --device mps ) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
+      --device cuda ) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
   train_rc=${PIPESTATUS[0]}
 
   if [[ $train_rc -ne 0 ]]; then
