@@ -139,6 +139,12 @@ class TwoWayTrainer(BaseTrainer):
         self.weight_decay = float(training_cfg.get("weight_decay", 1e-4))
         self.max_epochs_pretrain = int(training_cfg.get("max_epochs_pretrain", 5))
         self.max_epochs_pu = int(training_cfg.get("max_epochs_pu", 10))
+        steps_per_epoch = training_cfg.get("stage2_steps_per_epoch")
+        self.stage2_steps_per_epoch = (
+            int(steps_per_epoch) if steps_per_epoch is not None else None
+        )
+        if self.stage2_steps_per_epoch is not None and self.stage2_steps_per_epoch < 1:
+            raise ValueError("stage2_steps_per_epoch must be positive when set")
 
         self.w_ssl = float(training_cfg.get("w_ssl", 1.0))
         self.w_alert = float(training_cfg.get("w_alert", 0.2))
@@ -259,6 +265,18 @@ class TwoWayTrainer(BaseTrainer):
 
     def _do_optim_step(self, loss: torch.Tensor) -> None:
         self._optim_step(loss, self.optim, self.all_params)
+
+    @staticmethod
+    def _next_batch(loader: DataLoader, iterator: Any) -> Tuple[Any, Any]:
+        """Return the next batch, restarting the loader after exhaustion."""
+        try:
+            return next(iterator), iterator
+        except StopIteration:
+            iterator = iter(loader)
+            try:
+                return next(iterator), iterator
+            except StopIteration as exc:
+                raise ValueError("Stage-2 training loader must not be empty") from exc
 
     # ── Stage 2 trainability / plasticity ───────────
 
@@ -514,15 +532,14 @@ class TwoWayTrainer(BaseTrainer):
             total = 0.0
             n = 0
 
+            iter_p = iter(loader_p)
             iter_u = iter(loader_u)
-            for batch_p in loader_p:
+            steps_this_epoch = self.stage2_steps_per_epoch or len(loader_p)
+            for _ in range(steps_this_epoch):
                 if stop_flag and stop_flag():
                     break
-                try:
-                    batch_u = next(iter_u)
-                except StopIteration:
-                    iter_u = iter(loader_u)
-                    batch_u = next(iter_u)
+                batch_p, iter_p = self._next_batch(loader_p, iter_p)
+                batch_u, iter_u = self._next_batch(loader_u, iter_u)
 
                 batch_p = to_device(batch_p, self.device)
                 batch_u = to_device(batch_u, self.device)
@@ -593,9 +610,9 @@ class TwoWayTrainer(BaseTrainer):
             lr = self.optim.param_groups[0]["lr"]
             fn_recall = val_stats.get("snort_fn_recall", 0.0)
             logger.info(
-                "[nnPU epoch %d] loss=%.4f %s=%.4f bestF1=%.4f "
+                "[nnPU epoch %d] steps=%d loss=%.4f %s=%.4f bestF1=%.4f "
                 "fn_recall=%.4f thr=%.3f lr=%.2e",
-                epoch, total / max(1, n), self.best_metric, metric_val,
+                epoch, n, total / max(1, n), self.best_metric, metric_val,
                 val_stats["best_f1"], fn_recall,
                 val_stats["best_threshold"], lr,
             )
@@ -680,9 +697,12 @@ class TwoWayTrainer(BaseTrainer):
             total = 0.0
             n = 0
 
-            for batch in loader_train:
+            iter_train = iter(loader_train)
+            steps_this_epoch = self.stage2_steps_per_epoch or len(loader_train)
+            for _ in range(steps_this_epoch):
                 if stop_flag and stop_flag():
                     break
+                batch, iter_train = self._next_batch(loader_train, iter_train)
                 batch = to_device(batch, self.device)
 
                 z = self.backbone(batch)
@@ -728,9 +748,9 @@ class TwoWayTrainer(BaseTrainer):
             lr = self.optim.param_groups[0]["lr"]
             fn_recall = val_stats.get("snort_fn_recall", 0.0)
             logger.info(
-                "[supervised epoch %d] loss=%.4f %s=%.4f bestF1=%.4f "
+                "[supervised epoch %d] steps=%d loss=%.4f %s=%.4f bestF1=%.4f "
                 "fn_recall=%.4f thr=%.3f lr=%.2e",
-                epoch, total / max(1, n), self.best_metric, metric_val,
+                epoch, n, total / max(1, n), self.best_metric, metric_val,
                 val_stats["best_f1"], fn_recall,
                 val_stats["best_threshold"], lr,
             )
