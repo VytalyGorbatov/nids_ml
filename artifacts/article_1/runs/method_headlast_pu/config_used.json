@@ -51,7 +51,7 @@
     "max_epochs_pu": 7,
     "num_workers": 0,
     "patience": 2,
-    "pi_p": 0.25,
+    "pi_p": 0.15,
     "save_epoch_checkpoints": true,
     "stage2_objective": "pu",
     "stage2_trainable": "head_last_block",

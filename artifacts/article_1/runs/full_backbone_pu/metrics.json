@@ -1,37 +1,26 @@
 {
   "best_val_metrics": {
-    "best_f1": 0.8701419234275818,
-    "best_threshold": 0.7410793304443359,
-    "pr_auc": 0.9049093127250671,
-    "precision_at_best": 0.8533092141151428,
-    "recall_at_best": 0.8876519799232483,
-    "snort_fn_count": 4918,
-    "snort_fn_f1": 0.8882296650717703,
-    "snort_fn_precision": 0.838937093275488,
-    "snort_fn_recall": 0.9436762911752745,
-    "snort_fn_recovered": 4641
+    "best_f1": 0.5941298604011536,
+    "best_threshold": 0.21960659325122833,
+    "pr_auc": 0.6257777214050293,
+    "precision_at_best": 0.7297887802124023,
+    "recall_at_best": 0.5009999871253967,
+    "snort_fn_count": 1539,
+    "snort_fn_f1": 0.5687523417010115,
+    "snort_fn_precision": 0.6716814159292035,
+    "snort_fn_recall": 0.49317738791423,
+    "snort_fn_recovered": 759
   },
-  "pretrain_val": {
-    "best_f1": 0.35019204020500183,
-    "best_threshold": 0.4041348695755005,
-    "pr_auc": 0.22579024732112885,
-    "precision_at_best": 0.21617712080478668,
-    "recall_at_best": 0.9213906526565552,
-    "snort_fn_count": 4918,
-    "snort_fn_f1": 0.3160398497018167,
-    "snort_fn_precision": 0.19027852725084057,
-    "snort_fn_recall": 0.9320862139080928,
-    "snort_fn_recovered": 4584
-  },
+  "pretrain_val": {},
   "test_metrics": {
-    "best_f1_sweep": 0.8671208024024963,
-    "best_threshold_sweep": 0.7306084632873535,
+    "best_f1_sweep": 0.6110039353370667,
+    "best_threshold_sweep": 0.1920897513628006,
     "calibrator": "isotonic",
-    "f1": 0.8660377264022827,
-    "pr_auc": 0.8797674179077148,
-    "precision": 0.8005813956260681,
-    "recall": 0.9431506991386414,
+    "f1": 0.4640839099884033,
+    "pr_auc": 0.7170018553733826,
+    "precision": 1.0,
+    "recall": 0.3021544814109802,
     "threshold": 0.5,
-    "val_threshold_raw": 0.7410793304443359
+    "val_threshold_raw": 0.21960659325122833
   }
 }

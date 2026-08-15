@@ -1,11 +1,11 @@
 Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6, 7] | budgets: [0.01, 0.05, 0.1]
-[epoch 0] test_pr_auc=0.9441 | R@1%=0.9654(fp+1736), R@5%=0.9685(fp+2100), R@10%=0.9685(fp+2119)
-[epoch 1] test_pr_auc=0.9763 | R@1%=0.9685(fp+1792), R@5%=0.9685(fp+1929), R@10%=0.9709(fp+2027)
-[epoch 2] test_pr_auc=0.9891 | R@1%=0.9689(fp+1722), R@5%=0.9766(fp+1770), R@10%=0.9905(fp+1859)
-[epoch 3] test_pr_auc=0.9894 | R@1%=0.9735(fp+1703), R@5%=0.9891(fp+1713), R@10%=0.9984(fp+1730)
-[epoch 4] test_pr_auc=0.9632 | R@1%=0.9812(fp+1688), R@5%=0.9970(fp+1710), R@10%=0.9998(fp+1720)
-[epoch 5] test_pr_auc=0.9277 | R@1%=0.9836(fp+1645), R@5%=0.9982(fp+1693), R@10%=1.0000(fp+1709)
-[epoch 6] test_pr_auc=0.8903 | R@1%=0.9947(fp+1669), R@5%=1.0000(fp+1701), R@10%=1.0000(fp+1713)
-[epoch 7] test_pr_auc=0.8704 | R@1%=0.9970(fp+1651), R@5%=1.0000(fp+1694), R@10%=1.0000(fp+1710)
+[epoch 0] test_pr_auc=0.9520 | R@1%=0.7169(fp+9), R@5%=0.8288(fp+198), R@10%=0.9394(fp+632)
+[epoch 1] test_pr_auc=0.9905 | R@1%=0.8058(fp+10), R@5%=0.8881(fp+64), R@10%=0.9743(fp+156)
+[epoch 2] test_pr_auc=0.9920 | R@1%=0.8940(fp+36), R@5%=0.9480(fp+101), R@10%=0.9888(fp+148)
+[epoch 3] test_pr_auc=0.9772 | R@1%=0.9138(fp+8), R@5%=0.9651(fp+65), R@10%=0.9921(fp+136)
+[epoch 4] test_pr_auc=0.9677 | R@1%=0.9480(fp+10), R@5%=0.9789(fp+73), R@10%=0.9954(fp+135)
+[epoch 5] test_pr_auc=0.9419 | R@1%=0.9506(fp+12), R@5%=0.9816(fp+78), R@10%=0.9954(fp+140)
+[epoch 6] test_pr_auc=0.9234 | R@1%=0.9625(fp+21), R@5%=0.9835(fp+88), R@10%=0.9961(fp+138)
+[epoch 7] test_pr_auc=0.8815 | R@1%=0.9671(fp+30), R@5%=0.9868(fp+97), R@10%=0.9961(fp+143)
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/oracle_isattack/epoch_budget_matrix.json
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/oracle_isattack/epoch_budget_matrix.md
