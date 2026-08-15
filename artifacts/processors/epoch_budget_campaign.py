@@ -5,8 +5,8 @@ Given a run directory containing ``config_used.json`` and one or more
 ``model_ep{e}.pt`` checkpoints (saved by ``TwoWayTrainer.train_pu`` when
 ``save_epoch_checkpoints=true``), this script regenerates raw val/test risk
 logits for every requested epoch and computes the calibrator-invariant
-Snort-FN recovery (R) at fixed benign-FPR budgets, plus PR-AUC and
-calibration diagnostics.
+Snort-FN recovery (R) at fixed benign-FPR budgets, plus AP and calibration
+diagnostics.
 
 No training happens here -- purely inference + threshold selection.
 
@@ -36,13 +36,13 @@ from nids_ml.data import TwoWayDatasetBuilder
 from nids_ml.data.common import to_device
 from nids_ml.models import build_model
 from nids_ml.training.calibration import IsotonicCalibrator
+from nids_ml.training.metrics import average_precision
 
 # Reuse the score-space metric helpers; never duplicate them.
 try:
     from nids_ml.artifacts.processors.iteration_campaign import (
         _best_fpr_threshold,
         _binary_metrics,
-        _pr_auc,
         _snort_metrics,
     )
 except ModuleNotFoundError:  # pragma: no cover - namespace-package fallback
@@ -50,7 +50,6 @@ except ModuleNotFoundError:  # pragma: no cover - namespace-package fallback
     from iteration_campaign import (  # type: ignore
         _best_fpr_threshold,
         _binary_metrics,
-        _pr_auc,
         _snort_metrics,
     )
 
@@ -136,8 +135,8 @@ def _evaluate_epoch(
     raw_val = torch.sigmoid(val_logits)
     raw_test = torch.sigmoid(test_logits)
 
-    test_pr_auc = _pr_auc(raw_test, test_labels)
-    val_pr_auc = _pr_auc(raw_val, val_labels)
+    test_average_precision = average_precision(raw_test, test_labels)
+    val_average_precision = average_precision(raw_val, val_labels)
 
     # Calibration diagnostics (context only; never used for R selection).
     iso = IsotonicCalibrator()
@@ -164,16 +163,20 @@ def _evaluate_epoch(
             "precision": bm["precision"],
             "recall": bm["recall"],
             "f1": bm["f1"],
-            "test_pr_auc": test_pr_auc,
-            "val_pr_auc": val_pr_auc,
+            "test_average_precision": test_average_precision,
+            "val_average_precision": val_average_precision,
+            "test_pr_auc": test_average_precision,
+            "val_pr_auc": val_average_precision,
             "brier": brier,
             "logloss": logloss,
         })
 
     summary = {
         "epoch": epoch,
-        "test_pr_auc": test_pr_auc,
-        "val_pr_auc": val_pr_auc,
+        "test_average_precision": test_average_precision,
+        "val_average_precision": val_average_precision,
+        "test_pr_auc": test_average_precision,
+        "val_pr_auc": val_average_precision,
         "brier": brier,
         "logloss": logloss,
         "f1_calibrated_0.5": f1_cal,
@@ -181,7 +184,40 @@ def _evaluate_epoch(
     return rows, summary
 
 
-# ─── markdown rendering ──────────────────────────────
+def _select_validation_epoch(summaries: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Select one checkpoint using validation AP only; lower epoch breaks ties."""
+    if not summaries:
+        raise ValueError("At least one epoch summary is required for selection")
+    return max(
+        summaries,
+        key=lambda summary: (
+            summary["val_average_precision"], -int(summary["epoch"]),
+        ),
+    )
+
+
+def _test_oracle_diagnostics(
+    rows: List[Dict[str, Any]], budgets: List[float],
+) -> List[Dict[str, Any]]:
+    """Return test-best epoch rows as explicitly non-operational diagnostics."""
+    diagnostics: List[Dict[str, Any]] = []
+    for budget in budgets:
+        candidates = [row for row in rows if row["budget"] == budget]
+        best = max(
+            candidates,
+            key=lambda row: (row["R"], -row["benign_fpr"], -row["epoch"]),
+        )
+        diagnostics.append({
+            "budget": budget,
+            "diagnostic_only": True,
+            "warning": "Test-selected epoch; not a reportable operating point.",
+            "test_best_epoch": best["epoch"],
+            "test_metrics": best,
+        })
+    return diagnostics
+
+
+# ─── markdown rendering ─────────────────────────────
 
 
 def _render_markdown(
@@ -189,9 +225,12 @@ def _render_markdown(
     summaries: List[Dict[str, Any]],
     budgets: List[float],
     epochs: List[int],
+    selected: Dict[str, Any],
+    selected_rows: List[Dict[str, Any]],
+    oracle_diagnostics: List[Dict[str, Any]],
 ) -> str:
     cell = {(r["epoch"], r["budget"]): r for r in rows}
-    pr_by_epoch = {s["epoch"]: s["test_pr_auc"] for s in summaries}
+    ap_by_epoch = {s["epoch"]: s["test_average_precision"] for s in summaries}
 
     lines = [
         "# Epoch x Budget Matrix",
@@ -199,18 +238,55 @@ def _render_markdown(
         "Each cell = R (Snort-FN recovery) / benign FP added, at a "
         "val-selected FPR budget applied to test.",
         "",
-        "| epoch | " + " | ".join(f"FPR<={b:.0%}" for b in budgets)
-        + " | test PR-AUC |",
-        "|" + "---|" * (len(budgets) + 2),
+        "## Reportable Validation Selection",
+        "",
+        f"Checkpoint policy: maximum validation AP. Selected epoch: "
+        f"{selected['epoch']} (validation AP={selected['val_average_precision']:.4f}).",
+        "The following test values use that single validation-selected checkpoint.",
+        "",
+        "| nominal FPR budget | Snort-FN recovery | added benign FP | observed test FPR |",
+        "|---|---:|---:|---:|",
     ]
+    for row in selected_rows:
+        lines.append(
+            f"| {row['budget']:.0%} | {row['R']:.4f} | "
+            f"{row['benign_fp_added']} | {row['benign_fpr']:.4%} |"
+        )
+    lines.extend([
+        "",
+        "## All Epochs (Diagnostic)",
+        "",
+        "Do not choose an epoch from this table using test results.",
+        "",
+        "| epoch | " + " | ".join(f"FPR<={b:.0%}" for b in budgets)
+        + " | test AP |",
+        "|" + "---|" * (len(budgets) + 2),
+    ])
     for e in epochs:
         cells: List[str] = []
         for b in budgets:
             r = cell.get((e, b))
             cells.append("-" if r is None else f"{r['R']:.4f} / {r['benign_fp_added']}")
-        pr = pr_by_epoch.get(e)
-        pr_str = "-" if pr is None else f"{pr:.4f}"
-        lines.append(f"| {e} | " + " | ".join(cells) + f" | {pr_str} |")
+        ap = ap_by_epoch.get(e)
+        ap_str = "-" if ap is None else f"{ap:.4f}"
+        lines.append(f"| {e} | " + " | ".join(cells) + f" | {ap_str} |")
+
+    lines.extend([
+        "",
+        "## Test-Oracle Diagnostics (Not Reportable)",
+        "",
+        "These entries retrospectively choose an epoch on test data and are "
+        "diagnostics only, never article results or operational settings.",
+        "",
+        "| nominal FPR budget | test-selected epoch | recovery | observed test FPR |",
+        "|---|---:|---:|---:|",
+    ])
+    for diagnostic in oracle_diagnostics:
+        row = diagnostic["test_metrics"]
+        lines.append(
+            f"| {diagnostic['budget']:.0%} | {diagnostic['test_best_epoch']} | "
+            f"{row['R']:.4f} | {row['benign_fpr']:.4%} |"
+        )
 
     return "\n".join(lines) + "\n"
 
@@ -295,10 +371,20 @@ def main() -> None:
             f"R@{r['budget']:.0%}={r['R']:.4f}(fp+{r['benign_fp_added']})"
             for r in rows
         )
-        print(f"[epoch {e}] test_pr_auc={summary['test_pr_auc']:.4f} | {r_str}")
+        print(
+            f"[epoch {e}] test_average_precision="
+            f"{summary['test_average_precision']:.4f} | {r_str}"
+        )
 
     if not all_rows:
         raise RuntimeError("No epoch checkpoints were evaluated.")
+
+    selected_summary = _select_validation_epoch(summaries)
+    selected_epoch = selected_summary["epoch"]
+    selected_rows = [
+        row for row in all_rows if row["epoch"] == selected_epoch
+    ]
+    oracle_diagnostics = _test_oracle_diagnostics(all_rows, budgets)
 
     matrix_path = out_dir / "epoch_budget_matrix.json"
     with matrix_path.open("w", encoding="utf-8") as f:
@@ -306,10 +392,24 @@ def main() -> None:
 
     md_path = out_dir / "epoch_budget_matrix.md"
     with md_path.open("w", encoding="utf-8") as f:
-        f.write(_render_markdown(all_rows, summaries, budgets, used_epochs))
+        f.write(_render_markdown(
+            all_rows, summaries, budgets, used_epochs, selected_summary,
+            selected_rows, oracle_diagnostics,
+        ))
+
+    selection_path = out_dir / "validation_selected_results.json"
+    with selection_path.open("w", encoding="utf-8") as f:
+        json.dump({
+            "selection_policy": "maximum validation Average Precision; lower epoch breaks ties",
+            "selected_epoch": selected_epoch,
+            "selected_validation_metrics": selected_summary,
+            "test_metrics_at_validation_selected_epoch": selected_rows,
+            "oracle_diagnostics": oracle_diagnostics,
+        }, f, indent=2)
 
     print(f"Saved {matrix_path.as_posix()}")
     print(f"Saved {md_path.as_posix()}")
+    print(f"Saved {selection_path.as_posix()}")
 
 
 if __name__ == "__main__":

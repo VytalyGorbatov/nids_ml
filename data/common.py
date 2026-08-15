@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import random
+import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 PAD_IDX = 256
 SEP_BYTE = 0x1E  # record separator (decimal 30)
+_CALL_ID_RE = re.compile(r"(?im)^Call-ID\s*:\s*([^\r\n]+)")
 
 
 # ─── Buffer decoding ──────────────────────────────────
@@ -45,6 +47,26 @@ def decode_buffers_field(x: Any) -> List[int]:
         return list(x.encode("latin1", errors="ignore"))
 
     raise TypeError(f"Unsupported buffers field type: {type(x)}")
+
+
+def extract_record_call_id(record: Dict[str, Any], buffer_field: str) -> Optional[str]:
+    """Return an explicit or SIP-header Call-ID for prediction provenance."""
+    explicit_call_id = record.get("call_id")
+    if explicit_call_id is not None and str(explicit_call_id).strip():
+        return str(explicit_call_id).strip()
+
+    buffer_value = record.get(buffer_field)
+    if buffer_value is None:
+        return None
+    try:
+        text = bytes(decode_buffers_field(buffer_value)).decode(
+            "latin1", errors="ignore",
+        )
+    except TypeError:
+        return None
+    text = text.replace("\\r\\n", "\r\n").replace("\\n", "\n")
+    match = _CALL_ID_RE.search(text)
+    return match.group(1).strip() if match else None
 
 
 # ─── Sequence helpers ─────────────────────────────────
@@ -122,6 +144,7 @@ class TwoWayRecordDataset(Dataset):
         return {
             "header_ids": header_ids,
             "body_ids": body_ids,
+            "call_id": extract_record_call_id(r, self.cfg.buffer_field),
             "alerted": int(r.get("alerted", 0)),
             "is_attack": int(r.get("is_attack", 0)),
             "loss_weight": float(r.get("loss_weight", 1.0)),
@@ -134,7 +157,7 @@ class TwoWayRecordDataset(Dataset):
 
 def twoway_collate_fn(
     batch: List[Dict[str, Any]], cfg: DataConfig2Way,
-) -> Dict[str, torch.Tensor]:
+) -> Dict[str, Any]:
     header = torch.tensor([b["header_ids"] for b in batch], dtype=torch.long)
     body = torch.tensor([b["body_ids"] for b in batch], dtype=torch.long)
     return {
@@ -142,6 +165,7 @@ def twoway_collate_fn(
         "body_ids": body,
         "header_mask": header.ne(PAD_IDX),
         "body_mask": body.ne(PAD_IDX),
+        "call_id": [b.get("call_id") for b in batch],
         "alerted": torch.tensor([b["alerted"] for b in batch], dtype=torch.float32),
         "is_attack": torch.tensor([b["is_attack"] for b in batch], dtype=torch.float32),
         "loss_weight": torch.tensor([b.get("loss_weight", 1.0) for b in batch], dtype=torch.float32),
@@ -187,6 +211,10 @@ def augment_ids(
 
 
 def to_device(
-    batch: Dict[str, torch.Tensor], device: torch.device,
-) -> Dict[str, torch.Tensor]:
-    return {k: v.to(device) for k, v in batch.items()}
+    batch: Dict[str, Any], device: torch.device,
+) -> Dict[str, Any]:
+    """Move tensor values to a device while retaining provenance metadata."""
+    return {
+        key: value.to(device) if isinstance(value, torch.Tensor) else value
+        for key, value in batch.items()
+    }

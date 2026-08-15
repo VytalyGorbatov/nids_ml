@@ -15,6 +15,8 @@ from typing import Dict, List, Tuple
 
 import torch
 
+from nids_ml.training.metrics import average_precision
+
 # Make package importable when launched as a script.
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
@@ -88,23 +90,8 @@ def _snort_metrics(
 
 
 def _pr_auc(scores: torch.Tensor, labels: torch.Tensor) -> float:
-    # Approximate PR-AUC by threshold sweep over unique scores.
-    thresholds = torch.unique(scores)
-    thresholds = torch.sort(thresholds, descending=True).values
-    p_vals = []
-    r_vals = []
-    for t in thresholds:
-        m = _binary_metrics(scores, labels, float(t.item()))
-        p_vals.append(m["precision"])
-        r_vals.append(m["recall"])
-    area = 0.0
-    prev_r = 0.0
-    prev_p = p_vals[-1] if p_vals else 0.0
-    for p, r in sorted(zip(p_vals, r_vals), key=lambda x: x[1]):
-        area += (r - prev_r) * (p + prev_p) / 2.0
-        prev_r = r
-        prev_p = p
-    return float(max(area, 0.0))
+    """Legacy name for the canonical Average Precision helper."""
+    return average_precision(scores, labels)
 
 
 def _best_f1_threshold(scores: torch.Tensor, labels: torch.Tensor) -> float:
@@ -179,9 +166,14 @@ def _evaluate_iteration(
     t_fpr5 = _best_fpr_threshold(val_scores, val_labels, val_alerted, 0.05)
     t_fpr1 = _best_fpr_threshold(val_scores, val_labels, val_alerted, 0.01)
 
-    def at_thr(thr: float) -> Dict[str, float]:
-        b = _binary_metrics(test_scores, test_labels, thr)
-        s = _snort_metrics(test_scores, test_labels, test_alerted, thr)
+    def at_thr(
+        scores: torch.Tensor,
+        labels: torch.Tensor,
+        alerted: torch.Tensor,
+        thr: float,
+    ) -> Dict[str, float]:
+        b = _binary_metrics(scores, labels, thr)
+        s = _snort_metrics(scores, labels, alerted, thr)
         return {
             "threshold": thr,
             "precision": b["precision"],
@@ -194,21 +186,37 @@ def _evaluate_iteration(
             "snort_fn_total": s["snort_fn_total"],
         }
 
-    selected = at_thr(selected_threshold)
+    validation_selected = at_thr(
+        val_scores, val_labels, val_alerted, selected_threshold,
+    )
+    test_selected = at_thr(
+        test_scores, test_labels, test_alerted, selected_threshold,
+    )
+    validation_operating_points = {
+        "T_f1": at_thr(val_scores, val_labels, val_alerted, t_f1),
+        "T_p90": at_thr(val_scores, val_labels, val_alerted, t_p90),
+        "T_fpr10": at_thr(val_scores, val_labels, val_alerted, t_fpr10),
+        "T_fpr5": at_thr(val_scores, val_labels, val_alerted, t_fpr5),
+        "T_fpr1": at_thr(val_scores, val_labels, val_alerted, t_fpr1),
+    }
+    test_operating_points = {
+        "T_f1": at_thr(test_scores, test_labels, test_alerted, t_f1),
+        "T_p90": at_thr(test_scores, test_labels, test_alerted, t_p90),
+        "T_fpr10": at_thr(test_scores, test_labels, test_alerted, t_fpr10),
+        "T_fpr5": at_thr(test_scores, test_labels, test_alerted, t_fpr5),
+        "T_fpr1": at_thr(test_scores, test_labels, test_alerted, t_fpr1),
+    }
 
     return {
         "iteration": iteration,
         "name": name,
-        "pr_auc_test": _pr_auc(test_scores, test_labels),
+        "validation_average_precision": _pr_auc(val_scores, val_labels),
+        "test_average_precision": _pr_auc(test_scores, test_labels),
         "selected_threshold": selected_threshold,
-        "selected_test_metrics": selected,
-        "operating_points": {
-            "T_f1": at_thr(t_f1),
-            "T_p90": at_thr(t_p90),
-            "T_fpr10": at_thr(t_fpr10),
-            "T_fpr5": at_thr(t_fpr5),
-            "T_fpr1": at_thr(t_fpr1),
-        },
+        "selected_validation_metrics": validation_selected,
+        "selected_test_metrics": test_selected,
+        "validation_operating_points": validation_operating_points,
+        "test_operating_points": test_operating_points,
     }
 
 
@@ -255,9 +263,17 @@ def main() -> None:
     iterations.append(_evaluate_iteration(4, "isotonic@0.5", iso_v, iso_t, v_y, t_y, v_a, t_a, 0.5))
     iterations.append(_evaluate_iteration(5, "prior_plus_platt@0.5", pp_v, pp_t, v_y, t_y, v_a, t_a, 0.5))
 
-    # Choose calibration backbone by highest FN recovery at T_fpr5 on test.
+    # Choose calibration policy using validation only. Test remains untouched
+    # until final evaluation at the validation-selected operating points.
     first_five = iterations[:5]
-    best_cal = max(first_five, key=lambda r: r["operating_points"]["T_fpr5"]["snort_fn_recovery"])
+    best_cal = max(
+        first_five,
+        key=lambda result: (
+            result["validation_operating_points"]["T_fpr5"]["snort_fn_recovery"],
+            -result["validation_operating_points"]["T_fpr5"]["benign_fpr"],
+            result["validation_average_precision"],
+        ),
+    )
     best_name = best_cal["name"]
 
     if "prior_plus_platt" in best_name:
@@ -287,10 +303,10 @@ def main() -> None:
     ranked = sorted(
         iterations,
         key=lambda r: (
-            r["operating_points"]["T_fpr5"]["snort_fn_recovery"],
-            r["operating_points"]["T_fpr1"]["snort_fn_recovery"],
-            r["operating_points"]["T_fpr10"]["snort_fn_recovery"],
-            -r["operating_points"]["T_fpr5"]["benign_fpr"],
+            r["validation_operating_points"]["T_fpr5"]["snort_fn_recovery"],
+            r["validation_operating_points"]["T_fpr1"]["snort_fn_recovery"],
+            r["validation_operating_points"]["T_fpr10"]["snort_fn_recovery"],
+            -r["validation_operating_points"]["T_fpr5"]["benign_fpr"],
         ),
         reverse=True,
     )
@@ -298,17 +314,18 @@ def main() -> None:
     summary = {
         "best_iteration": ranked[0]["iteration"],
         "best_name": ranked[0]["name"],
+        "selection_policy": "validation-only calibration policy and threshold ranking",
         "iterations": iterations,
         "ranking": [
             {
                 "iteration": r["iteration"],
                 "name": r["name"],
-                "T_fpr10_fn_recovery": r["operating_points"]["T_fpr10"]["snort_fn_recovery"],
-                "T_fpr5_fn_recovery": r["operating_points"]["T_fpr5"]["snort_fn_recovery"],
-                "T_fpr1_fn_recovery": r["operating_points"]["T_fpr1"]["snort_fn_recovery"],
-                "selected_f1": r["selected_test_metrics"]["f1"],
-                "selected_precision": r["selected_test_metrics"]["precision"],
-                "selected_recall": r["selected_test_metrics"]["recall"],
+                "validation_T_fpr10_fn_recovery": r["validation_operating_points"]["T_fpr10"]["snort_fn_recovery"],
+                "validation_T_fpr5_fn_recovery": r["validation_operating_points"]["T_fpr5"]["snort_fn_recovery"],
+                "validation_T_fpr1_fn_recovery": r["validation_operating_points"]["T_fpr1"]["snort_fn_recovery"],
+                "test_f1_at_validation_selected_threshold": r["selected_test_metrics"]["f1"],
+                "test_precision_at_validation_selected_threshold": r["selected_test_metrics"]["precision"],
+                "test_recall_at_validation_selected_threshold": r["selected_test_metrics"]["recall"],
                 "selected_threshold": r["selected_threshold"],
             }
             for r in ranked
@@ -319,17 +336,18 @@ def main() -> None:
         json.dump(summary, f, indent=2)
 
     top = ranked[0]
-    op = top["operating_points"]
+    op = top["test_operating_points"]
     s = top["selected_test_metrics"]
 
     lines = [
         "# 10-Iteration Improvement Campaign",
         "",
-        f"Best iteration: {top['iteration']} - {top['name']}",
+        f"Validation-selected iteration: {top['iteration']} - {top['name']}",
         "",
         "## Best iteration summary",
         f"- Selected threshold: {top['selected_threshold']:.4f}",
-        f"- Test PR-AUC: {top['pr_auc_test']:.4f}",
+        "- Selection policy: validation-only calibration policy and threshold ranking",
+        f"- Test AP (evaluation only): {top['test_average_precision']:.4f}",
         f"- Test F1: {s['f1']:.4f}",
         f"- Precision: {s['precision']:.4f}",
         f"- Recall: {s['recall']:.4f}",
@@ -337,16 +355,18 @@ def main() -> None:
         f"- Snort FN recovery @FPR<=5%: {op['T_fpr5']['snort_fn_recovery']:.4f}",
         f"- Snort FN recovery @FPR<=1%: {op['T_fpr1']['snort_fn_recovery']:.4f}",
         "",
-        "## Ranking (primary: FN recovery at FPR<=5%)",
+        "## Validation Ranking (primary: FN recovery at FPR<=5%)",
     ]
 
     for i, r in enumerate(summary["ranking"], start=1):
         lines.append(
             f"{i}. iter {r['iteration']} {r['name']} | "
-            f"FN@10%={r['T_fpr10_fn_recovery']:.4f}, "
-            f"FN@5%={r['T_fpr5_fn_recovery']:.4f}, "
-            f"FN@1%={r['T_fpr1_fn_recovery']:.4f}, "
-            f"F1={r['selected_f1']:.4f}, P={r['selected_precision']:.4f}, R={r['selected_recall']:.4f}"
+            f"val FN@10%={r['validation_T_fpr10_fn_recovery']:.4f}, "
+            f"val FN@5%={r['validation_T_fpr5_fn_recovery']:.4f}, "
+            f"val FN@1%={r['validation_T_fpr1_fn_recovery']:.4f}, "
+            f"test F1={r['test_f1_at_validation_selected_threshold']:.4f}, "
+            f"P={r['test_precision_at_validation_selected_threshold']:.4f}, "
+            f"R={r['test_recall_at_validation_selected_threshold']:.4f}"
         )
 
     with (out_dir / "campaign_report.md").open("w", encoding="utf-8") as f:

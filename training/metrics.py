@@ -7,6 +7,7 @@ from typing import Dict
 
 import numpy as np
 import torch
+from sklearn.metrics import average_precision_score
 
 from ..local_types import Metrics
 
@@ -32,22 +33,48 @@ class MetricUtils:
 
 
 @torch.no_grad()
+def average_precision(
+    scores: torch.Tensor,
+    y_true: torch.Tensor,
+) -> float:
+    """Return the canonical tie-safe Average Precision score.
+
+    The metric is computed from the full score ranking with all samples that
+    share a score treated as one threshold group.  This is the definition used
+    for checkpoint selection and all reported AP values.
+    """
+    scores = scores.detach().cpu().reshape(-1)
+    y_true = y_true.detach().cpu().reshape(-1)
+    if scores.numel() != y_true.numel():
+        raise ValueError("scores and y_true must have the same number of elements")
+    if scores.numel() == 0 or not bool((y_true == 1).any()):
+        return 0.0
+
+    return float(average_precision_score(
+        y_true.numpy(), scores.numpy(), pos_label=1,
+    ))
+
+
+@torch.no_grad()
 def pr_curve_best_f1(
     scores: torch.Tensor,
     y_true: torch.Tensor,
 ) -> Dict[str, float]:
-    """Compute the PR curve and return the threshold that maximises F1."""
-    scores = scores.detach().cpu()
-    y_true = y_true.detach().cpu()
+    """Return tie-safe Average Precision and the threshold maximising F1."""
+    scores = scores.detach().cpu().reshape(-1)
+    y_true = y_true.detach().cpu().reshape(-1)
 
     if scores.numel() == 0:
         return {
             "best_threshold": 0.5,
             "best_f1": 0.0,
+            "average_precision": 0.0,
             "pr_auc": 0.0,
             "precision_at_best": 0.0,
             "recall_at_best": 0.0,
         }
+    if scores.numel() != y_true.numel():
+        raise ValueError("scores and y_true must have the same number of elements")
 
     idx = torch.argsort(scores, descending=True)
     s = scores[idx]
@@ -55,6 +82,15 @@ def pr_curve_best_f1(
 
     tp = torch.cumsum(y, dim=0)
     fp = torch.cumsum(1 - y, dim=0)
+    # A threshold applies to every sample at the same score.  Evaluating only
+    # after each tied score group makes the selected F1/threshold executable.
+    group_ends = torch.cat((
+        torch.nonzero(s[:-1] != s[1:], as_tuple=False).flatten(),
+        torch.tensor([s.numel() - 1]),
+    ))
+    tp = tp[group_ends]
+    fp = fp[group_ends]
+    thresholds = s[group_ends]
     fn = tp[-1] - tp
 
     precision = tp / (tp + fp).clamp_min(1.0)
@@ -62,12 +98,14 @@ def pr_curve_best_f1(
     f1 = 2 * precision * recall / (precision + recall).clamp_min(1e-12)
 
     best_i = int(torch.argmax(f1).item())
-    pr_auc = float(torch.trapz(precision, recall).item())
+    ap = average_precision(scores, y_true)
 
     return {
-        "best_threshold": float(s[best_i].item()),
+        "best_threshold": float(thresholds[best_i].item()),
         "best_f1": float(f1[best_i].item()),
-        "pr_auc": pr_auc,
+        "average_precision": ap,
+        # Backward-compatible artifact key.  New reports must call this AP.
+        "pr_auc": ap,
         "precision_at_best": float(precision[best_i].item()),
         "recall_at_best": float(recall[best_i].item()),
     }
@@ -122,4 +160,6 @@ def snort_fn_metrics(
     }
 
 
-__all__ = ["MetricUtils", "pr_curve_best_f1", "snort_fn_metrics"]
+__all__ = [
+    "MetricUtils", "average_precision", "pr_curve_best_f1", "snort_fn_metrics",
+]

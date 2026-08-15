@@ -181,7 +181,8 @@ class TwoWayPipeline:
         recall = tp / (tp + fn).clamp_min(1.0)
         f1 = 2 * precision * recall / (precision + recall).clamp_min(1e-12)
 
-        # PR-AUC on raw scores for reference
+        # AP is threshold-free test evaluation. The F1 sweep below is an
+        # oracle diagnostic only because its threshold is selected on test.
         sweep = pr_curve_best_f1(raw_scores, labels)
 
         return {
@@ -189,9 +190,15 @@ class TwoWayPipeline:
             "f1": float(f1.item()),
             "precision": float(precision.item()),
             "recall": float(recall.item()),
+            "average_precision": sweep["average_precision"],
             "pr_auc": sweep["pr_auc"],
-            "best_f1_sweep": sweep["best_f1"],
-            "best_threshold_sweep": sweep["best_threshold"],
+            "selection_policy": "validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5",
+            "oracle_diagnostics": {
+                "test_best_f1": sweep["best_f1"],
+                "test_best_threshold": sweep["best_threshold"],
+                "test_precision_at_best_f1": sweep["precision_at_best"],
+                "test_recall_at_best_f1": sweep["recall_at_best"],
+            },
             "calibrator": calibrator.name,
             "val_threshold_raw": best_val.get("best_threshold", 0.5),
         }
@@ -217,10 +224,12 @@ class TwoWayPipeline:
 
             is_attack = batch.get("is_attack")
             alerted = batch.get("alerted")
+            call_ids = batch.get("call_id")
 
             for i in range(n):
                 row: dict[str, Any] = {
                     "split": split,
+                    "call_id": call_ids[i] if call_ids is not None else None,
                     "raw_logit": round(float(logits[i].item()), 4),
                     "raw_score": round(float(scores[i].item()), 4),
                     "calibrated_score": round(float(cal_scores[i].item()), 4),
