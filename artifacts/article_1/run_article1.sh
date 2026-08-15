@@ -61,18 +61,18 @@ RUNS=(
 #   exit "$pretrain_rc"
 # fi
 
-# pretrain_epoch=-1
-# for checkpoint in "$PKG_DIR/$PRETRAIN_DIR"/pretrain_epoch*.pt; do
-#   [[ -f "$checkpoint" ]] || continue
-#   [[ "$checkpoint" -nt "$PRETRAIN_MARKER" ]] || continue
-#   epoch="${checkpoint##*pretrain_epoch}"
-#   epoch="${epoch%.pt}"
-#   [[ "$epoch" =~ ^[0-9]+$ ]] || continue
-#   if (( 10#$epoch > pretrain_epoch )); then
-#     pretrain_epoch=$((10#$epoch))
-#     PRETRAIN="${checkpoint#"$PKG_DIR/"}"
-#   fi
-# done
+pretrain_epoch=-1
+for checkpoint in "$PKG_DIR/$PRETRAIN_DIR"/pretrain_epoch*.pt; do
+  [[ -f "$checkpoint" ]] || continue
+  epoch="${checkpoint##*pretrain_epoch}"
+  epoch="${epoch%.pt}"
+  [[ "$epoch" =~ ^[0-9]+$ ]] || continue
+  if (( 10#$epoch > pretrain_epoch )); then
+    pretrain_epoch=$((10#$epoch))
+    PRETRAIN="${checkpoint#"$PKG_DIR/"}"
+  fi
+done
+echo "Latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
 # rm -f "$PRETRAIN_MARKER"
 
 # if [[ -z "$PRETRAIN" ]]; then

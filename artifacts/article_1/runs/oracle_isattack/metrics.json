@@ -1,26 +1,45 @@
 {
   "best_val_metrics": {
-    "best_f1": 0.9542044401168823,
-    "best_threshold": 0.9716761112213135,
-    "pr_auc": 0.9837693572044373,
-    "precision_at_best": 0.9887399673461914,
-    "recall_at_best": 0.921999990940094,
+    "average_precision": 0.9444608347473167,
+    "best_f1": 0.8984812498092651,
+    "best_threshold": 0.9813498258590698,
+    "pr_auc": 0.9444608347473167,
+    "precision_at_best": 0.9617798328399658,
+    "recall_at_best": 0.8429999947547913,
     "snort_fn_count": 1539,
-    "snort_fn_f1": 0.9463019250253293,
-    "snort_fn_precision": 0.9852320675105485,
-    "snort_fn_recall": 0.9103313840155945,
-    "snort_fn_recovered": 1401
+    "snort_fn_f1": 0.8920317350810625,
+    "snort_fn_precision": 0.950735294117647,
+    "snort_fn_recall": 0.8401559454191033,
+    "snort_fn_recovered": 1293
   },
-  "pretrain_val": {},
+  "pretrain_val": {
+    "average_precision": 0.13771043347434464,
+    "best_f1": 0.2264869511127472,
+    "best_threshold": 0.5775178670883179,
+    "pr_auc": 0.13771043347434464,
+    "precision_at_best": 0.16017405688762665,
+    "recall_at_best": 0.3865000009536743,
+    "snort_fn_count": 1539,
+    "snort_fn_f1": 0.18294069861900894,
+    "snort_fn_precision": 0.12196707105719237,
+    "snort_fn_recall": 0.36582196231319036,
+    "snort_fn_recovered": 563
+  },
   "test_metrics": {
-    "best_f1_sweep": 0.9790246486663818,
-    "best_threshold_sweep": 0.8252240419387817,
+    "average_precision": 0.9848241998344107,
     "calibrator": "isotonic",
-    "f1": 0.9730603098869324,
-    "pr_auc": 0.9979597330093384,
-    "precision": 0.9983416199684143,
-    "recall": 0.9490278363227844,
+    "f1": 0.946290135383606,
+    "oracle_diagnostics": {
+      "test_best_f1": 0.9605618715286255,
+      "test_best_threshold": 0.9501720070838928,
+      "test_precision_at_best_f1": 0.9883268475532532,
+      "test_recall_at_best_f1": 0.9343142509460449
+    },
+    "pr_auc": 0.9848241998344107,
+    "precision": 1.0,
+    "recall": 0.8980556726455688,
+    "selection_policy": "validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5",
     "threshold": 0.5,
-    "val_threshold_raw": 0.9716761112213135
+    "val_threshold_raw": 0.9813498258590698
   }
 }

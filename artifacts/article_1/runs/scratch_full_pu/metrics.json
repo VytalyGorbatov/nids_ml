@@ -1,8 +1,9 @@
 {
   "best_val_metrics": {
+    "average_precision": 0.626338002825854,
     "best_f1": 0.5941298604011536,
     "best_threshold": 0.21960659325122833,
-    "pr_auc": 0.6257777214050293,
+    "pr_auc": 0.626338002825854,
     "precision_at_best": 0.7297887802124023,
     "recall_at_best": 0.5009999871253967,
     "snort_fn_count": 1539,
@@ -13,13 +14,19 @@
   },
   "pretrain_val": {},
   "test_metrics": {
-    "best_f1_sweep": 0.6110039353370667,
-    "best_threshold_sweep": 0.1920897513628006,
+    "average_precision": 0.7175818301083071,
     "calibrator": "isotonic",
     "f1": 0.4640839099884033,
-    "pr_auc": 0.7170018553733826,
+    "oracle_diagnostics": {
+      "test_best_f1": 0.6110039353370667,
+      "test_best_threshold": 0.1920897513628006,
+      "test_precision_at_best_f1": 0.5649263858795166,
+      "test_recall_at_best_f1": 0.6652653813362122
+    },
+    "pr_auc": 0.7175818301083071,
     "precision": 1.0,
     "recall": 0.3021544814109802,
+    "selection_policy": "validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5",
     "threshold": 0.5,
     "val_threshold_raw": 0.21960659325122833
   }
