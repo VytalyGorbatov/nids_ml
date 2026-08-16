@@ -40,7 +40,7 @@
     "stage2_steps_per_epoch": 239,
     "num_workers": 0,
     "patience": 3,
-    "pi_p": 0.15,
+    "pi_p": 0.12,
     "temp": 0.2,
     "w_alert": 0.2,
     "w_pu": 1.0,
