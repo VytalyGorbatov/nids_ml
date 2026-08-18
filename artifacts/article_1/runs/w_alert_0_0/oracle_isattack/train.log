@@ -1,0 +1,42 @@
+2026-08-18 16:53:21,567 [INFO] Global seed set to 137744799
+2026-08-18 16:53:21,567 [INFO] Model type: tcn_2way | Device: cuda
+2026-08-18 16:53:22,313 [INFO] Train P (alerted=1): 2114, Train U (alerted=0): 65189
+2026-08-18 16:53:22,313 [INFO] Val: 18103, Test: 18000
+2026-08-18 16:53:22,314 [INFO] Building model type 'tcn_2way'
+2026-08-18 16:53:22,322 [INFO] Model parameters: 817,986
+2026-08-18 16:53:22,458 [INFO] Loaded pretrained checkpoint from artifacts/article_1/pretrain/pretrain_epoch29.pt
+2026-08-18 16:53:27,232 [INFO] Skipping Stage 1; loaded pretrained weights.
+2026-08-18 16:53:27,733 [INFO] Supervised train (all): 67303 records (alerted=1: 2114, is_attack=1: 9243)
+2026-08-18 16:53:27,733 [INFO] == Stage 2: supervised BCE training (8 epochs, target=is_attack) ==
+2026-08-18 16:53:27,734 [INFO] Stage-2 trainability: mode=head_last_block | 1 group(s) lrs=['1.00e-04'] | trainable=303,874 params | frozen=514,112 params
+2026-08-18 16:54:22,294 [INFO] [supervised epoch 0] steps=263 loss=0.2085 pr_auc=0.9419 bestF1=0.8412 fn_recall=0.9081 thr=0.450 lr=1.00e-04
+2026-08-18 16:55:16,032 [INFO] [supervised epoch 1] steps=263 loss=0.0768 pr_auc=0.9525 bestF1=0.8718 fn_recall=0.9590 thr=0.360 lr=1.00e-04
+2026-08-18 16:56:09,748 [INFO] [supervised epoch 2] steps=263 loss=0.0559 pr_auc=0.9633 bestF1=0.8855 fn_recall=0.9616 thr=0.542 lr=1.00e-04
+2026-08-18 16:57:03,631 [INFO] [supervised epoch 3] steps=263 loss=0.0394 pr_auc=0.9842 bestF1=0.9230 fn_recall=0.8836 thr=0.872 lr=1.00e-04
+2026-08-18 16:57:57,338 [INFO] [supervised epoch 4] steps=263 loss=0.0299 pr_auc=0.9856 bestF1=0.9261 fn_recall=0.9008 thr=0.934 lr=1.00e-04
+2026-08-18 16:58:51,186 [INFO] [supervised epoch 5] steps=263 loss=0.0228 pr_auc=0.9908 bestF1=0.9485 fn_recall=0.9173 thr=0.977 lr=1.00e-04
+2026-08-18 16:59:44,878 [INFO] [supervised epoch 6] steps=263 loss=0.0176 pr_auc=0.9948 bestF1=0.9664 fn_recall=0.9332 thr=0.984 lr=1.00e-04
+2026-08-18 17:00:38,627 [INFO] [supervised epoch 7] steps=263 loss=0.0141 pr_auc=0.9933 bestF1=0.9618 fn_recall=0.9239 thr=0.973 lr=1.00e-04
+2026-08-18 17:00:38,627 [INFO] Best checkpoint: pr_auc=0.9948
+2026-08-18 17:00:44,623 [INFO] PriorCorrection: pi_train=0.1000 pi_target=0.1066 shift=0.0714
+2026-08-18 17:00:44,623 [INFO]   prior_correction log-loss: 0.06131
+2026-08-18 17:00:44,634 [INFO] Platt scaling: a=1.0166 b=-3.4486
+2026-08-18 17:00:44,634 [INFO]   platt log-loss: 0.01973
+2026-08-18 17:00:44,850 [INFO] Isotonic calibration: 22 knots, range [0.0000, 1.0000]
+2026-08-18 17:00:44,850 [INFO]   isotonic log-loss: 0.01907
+2026-08-18 17:00:44,851 [INFO] Selected calibrator: isotonic (log-loss=0.01907)
+2026-08-18 17:00:50,780 [INFO] Test Metrics (calibrated, threshold=0.5):
+2026-08-18 17:00:50,780 [INFO]   threshold: 0.5000
+2026-08-18 17:00:50,780 [INFO]   f1: 0.9334
+2026-08-18 17:00:50,780 [INFO]   precision: 1.0000
+2026-08-18 17:00:50,780 [INFO]   recall: 0.8751
+2026-08-18 17:00:50,780 [INFO]   average_precision: 0.9989
+2026-08-18 17:00:50,780 [INFO]   pr_auc: 0.9989
+2026-08-18 17:00:50,780 [INFO]   selection_policy: validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5
+2026-08-18 17:00:50,780 [INFO]   oracle_diagnostics: {'test_best_f1': 0.9882689714431763, 'test_best_threshold': 0.4372197687625885, 'test_precision_at_best_f1': 0.9959630966186523, 'test_recall_at_best_f1': 0.9806928038597107}
+2026-08-18 17:00:50,780 [INFO]   calibrator: isotonic
+2026-08-18 17:00:50,780 [INFO]   val_threshold_raw: 0.9839
+2026-08-18 17:00:58,739 [INFO] Saved 18103 val samples to artifacts/article_1/runs/w_alert_0_0/oracle_isattack/val_samples.json
+2026-08-18 17:00:58,739 [INFO] Saved 18103 val samples to artifacts/article_1/runs/w_alert_0_0/oracle_isattack/val_samples.json
+2026-08-18 17:01:06,505 [INFO] Saved 18000 test samples to artifacts/article_1/runs/w_alert_0_0/oracle_isattack/test_samples.json
+2026-08-18 17:01:06,505 [INFO] Saved 18000 test samples to artifacts/article_1/runs/w_alert_0_0/oracle_isattack/test_samples.json

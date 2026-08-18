@@ -31,8 +31,8 @@ PYTHON_BIN="/home/vhorbato/.pyvenv/bin/python3"  # full path to python binary (m
 PRETRAIN_CFG="artifacts/article_1/configs/pretrain_uonly_ssl.json"
 PRETRAIN_DIR="artifacts/article_1/pretrain"
 PRETRAIN=""
-CFG_DIR="artifacts/article_1/configs"          # relative to PKG_DIR
-RUNS_DIR="artifacts/article_1/runs"            # relative to PKG_DIR
+CFG_DIR="artifacts/article_1/configs"             # relative to PKG_DIR
+RUNS_DIR="artifacts/article_1/runs/w_alert_0_0"   # relative to PKG_DIR
 BUDGETS="0.01,0.05,0.10"
 
 # Run list: "config_basename:use_pretrained(1|0)"
@@ -48,18 +48,18 @@ RUNS=(
 # echo "╔══════════════════════════════════════════════════════════════╗"
 # echo "║ Stage 1  Shared U-only SSL pretraining (30 epochs)             ║"
 # echo "╚══════════════════════════════════════════════════════════════╝"
-mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
+# mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
 PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
-( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
-    --config "$PRETRAIN_CFG" \
-    --device cuda ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
-pretrain_rc=${PIPESTATUS[0]}
+# ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
+#     --config "$PRETRAIN_CFG" \
+#     --device cuda ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
+# pretrain_rc=${PIPESTATUS[0]}
 
-if [[ $pretrain_rc -ne 0 ]]; then
-  rm -f "$PRETRAIN_MARKER"
-  echo "ERROR: Stage-1 pretraining failed (rc=$pretrain_rc)"
-  exit "$pretrain_rc"
-fi
+# if [[ $pretrain_rc -ne 0 ]]; then
+#   rm -f "$PRETRAIN_MARKER"
+#   echo "ERROR: Stage-1 pretraining failed (rc=$pretrain_rc)"
+#   exit "$pretrain_rc"
+# fi
 
 pretrain_epoch=-1
 for checkpoint in "$PKG_DIR/$PRETRAIN_DIR"/pretrain_epoch*.pt; do

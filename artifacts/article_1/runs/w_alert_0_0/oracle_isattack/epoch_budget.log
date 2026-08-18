@@ -1,0 +1,12 @@
+Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6, 7] | budgets: [0.01, 0.05, 0.1]
+[epoch 0] test_average_precision=0.9550 | R@1%=0.7466(fp+5), R@5%=0.9559(fp+612), R@10%=0.9985(fp+1756)
+[epoch 1] test_average_precision=0.9790 | R@1%=0.7242(fp+0), R@5%=0.9641(fp+458), R@10%=1.0000(fp+1725)
+[epoch 2] test_average_precision=0.9896 | R@1%=0.7481(fp+0), R@5%=0.9821(fp+440), R@10%=1.0000(fp+1653)
+[epoch 3] test_average_precision=0.9948 | R@1%=0.8214(fp+0), R@5%=0.9880(fp+373), R@10%=1.0000(fp+1567)
+[epoch 4] test_average_precision=0.9971 | R@1%=0.8229(fp+0), R@5%=0.9978(fp+570), R@10%=1.0000(fp+1557)
+[epoch 5] test_average_precision=0.9986 | R@1%=0.8722(fp+0), R@5%=0.9978(fp+484), R@10%=1.0000(fp+1668)
+[epoch 6] test_average_precision=0.9989 | R@1%=0.9178(fp+0), R@5%=0.9985(fp+401), R@10%=1.0000(fp+1699)
+[epoch 7] test_average_precision=0.9990 | R@1%=0.9126(fp+0), R@5%=0.9993(fp+635), R@10%=1.0000(fp+1568)
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/w_alert_0_0/oracle_isattack/epoch_budget_matrix.json
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/w_alert_0_0/oracle_isattack/epoch_budget_matrix.md
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/w_alert_0_0/oracle_isattack/validation_selected_results.json

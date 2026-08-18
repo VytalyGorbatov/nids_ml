@@ -1,6 +1,6 @@
 {
   "artifacts": {
-    "out_dir": "./artifacts/article_1/runs/method_headlast_pu"
+    "out_dir": "./artifacts/article_1/runs/w_alert_0_0/method_headlast_pu"
   },
   "attack_paths": {
     "test": "../sip-dataset/general_split/attack/test.json",
@@ -42,7 +42,7 @@
     "patience": 2,
     "pi_p": 0.12,
     "temp": 0.2,
-    "w_alert": 0.2,
+    "w_alert": 0.0,
     "w_pu": 1.0,
     "w_ssl": 1.5,
     "weight_decay": 0.0001,
