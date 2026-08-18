@@ -4,14 +4,14 @@ Each cell = R (Snort-FN recovery) / benign FP added, at a val-selected FPR budge
 
 ## Reportable Validation Selection
 
-Checkpoint policy: maximum validation AP. Selected epoch: 6 (validation AP=0.6727).
+Checkpoint policy: maximum validation AP. Selected epoch: 0 (validation AP=0.8921).
 The following test values use that single validation-selected checkpoint.
 
 | nominal FPR budget | Snort-FN recovery | added benign FP | observed test FPR |
 |---|---:|---:|---:|
-| 1% | 0.0908 | 0 | 0.0000% |
-| 5% | 0.3713 | 275 | 1.7722% |
-| 10% | 0.6471 | 1093 | 7.0439% |
+| 1% | 0.7078 | 170 | 1.0469% |
+| 5% | 0.8700 | 737 | 4.5385% |
+| 10% | 0.9679 | 2000 | 12.3160% |
 
 ## All Epochs (Diagnostic)
 
@@ -19,13 +19,13 @@ Do not choose an epoch from this table using test results.
 
 | epoch | FPR<=1% | FPR<=5% | FPR<=10% | test AP |
 |---|---|---|---|---|
-| 0 | 0.0000 / 84 | 0.0652 / 481 | 0.1810 / 1402 | 0.1730 |
-| 1 | 0.0000 / 17 | 0.2047 / 416 | 0.3377 / 1032 | 0.3045 |
-| 2 | 0.0000 / 1 | 0.2772 / 293 | 0.4042 / 883 | 0.4222 |
-| 3 | 0.0007 / 0 | 0.2745 / 238 | 0.4312 / 808 | 0.5416 |
-| 4 | 0.0059 / 0 | 0.3239 / 235 | 0.4694 / 775 | 0.6346 |
-| 5 | 0.0263 / 0 | 0.3581 / 286 | 0.6142 / 1016 | 0.6885 |
-| 6 | 0.0908 / 0 | 0.3713 / 275 | 0.6471 / 1093 | 0.7103 |
+| 0 | 0.7078 / 170 | 0.8700 / 737 | 0.9679 / 2000 | 0.9048 |
+| 1 | 0.4723 / 281 | 0.7145 / 1373 | 0.8161 / 2556 | 0.7652 |
+| 2 | 0.3176 / 315 | 0.6480 / 1393 | 0.7638 / 2391 | 0.6841 |
+| 3 | 0.2975 / 273 | 0.6286 / 1386 | 0.7631 / 2410 | 0.6803 |
+| 4 | 0.3027 / 192 | 0.5815 / 1120 | 0.7040 / 1941 | 0.6967 |
+| 5 | 0.2818 / 218 | 0.6031 / 1250 | 0.7317 / 2102 | 0.6856 |
+| 6 | 0.2997 / 172 | 0.5673 / 1028 | 0.7018 / 1916 | 0.7000 |
 
 ## Test-Oracle Diagnostics (Not Reportable)
 
@@ -33,6 +33,6 @@ These entries retrospectively choose an epoch on test data and are diagnostics o
 
 | nominal FPR budget | test-selected epoch | recovery | observed test FPR |
 |---|---:|---:|---:|
-| 1% | 6 | 0.0908 | 0.0000% |
-| 5% | 6 | 0.3713 | 1.7722% |
-| 10% | 6 | 0.6471 | 7.0439% |
+| 1% | 0 | 0.7078 | 1.0469% |
+| 5% | 0 | 0.8700 | 4.5385% |
+| 10% | 0 | 0.9679 | 12.3160% |

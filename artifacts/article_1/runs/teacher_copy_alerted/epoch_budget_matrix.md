@@ -4,14 +4,14 @@ Each cell = R (Snort-FN recovery) / benign FP added, at a val-selected FPR budge
 
 ## Reportable Validation Selection
 
-Checkpoint policy: maximum validation AP. Selected epoch: 2 (validation AP=0.8210).
+Checkpoint policy: maximum validation AP. Selected epoch: 1 (validation AP=0.8721).
 The following test values use that single validation-selected checkpoint.
 
 | nominal FPR budget | Snort-FN recovery | added benign FP | observed test FPR |
 |---|---:|---:|---:|
-| 1% | 0.2521 | 89 | 0.5736% |
-| 5% | 0.7064 | 929 | 5.9870% |
-| 10% | 0.8446 | 1345 | 8.6679% |
+| 1% | 0.7339 | 127 | 0.7821% |
+| 5% | 0.9372 | 790 | 4.8648% |
+| 10% | 0.9985 | 1711 | 10.5364% |
 
 ## All Epochs (Diagnostic)
 
@@ -19,14 +19,14 @@ Do not choose an epoch from this table using test results.
 
 | epoch | FPR<=1% | FPR<=5% | FPR<=10% | test AP |
 |---|---|---|---|---|
-| 0 | 0.0244 / 0 | 0.2699 / 417 | 0.5820 / 1179 | 0.5609 |
-| 1 | 0.1573 / 42 | 0.3305 / 550 | 0.7505 / 1304 | 0.6346 |
-| 2 | 0.2521 / 89 | 0.7064 / 929 | 0.8446 / 1345 | 0.7529 |
-| 3 | 0.2311 / 25 | 0.6840 / 999 | 0.8255 / 1604 | 0.7639 |
-| 4 | 0.1600 / 0 | 0.6847 / 988 | 0.8282 / 1832 | 0.7811 |
-| 5 | 0.1455 / 0 | 0.6537 / 1059 | 0.8124 / 2338 | 0.7514 |
-| 6 | 0.3311 / 62 | 0.5899 / 1027 | 0.7367 / 2602 | 0.7252 |
-| 7 | 0.0000 / 0 | 0.4536 / 1001 | 0.5267 / 1472 | 0.4897 |
+| 0 | 0.7212 / 188 | 0.9230 / 1034 | 0.9836 / 1666 | 0.8928 |
+| 1 | 0.7339 / 127 | 0.9372 / 790 | 0.9985 / 1711 | 0.9261 |
+| 2 | 0.5478 / 109 | 0.8490 / 705 | 0.9985 / 1896 | 0.8926 |
+| 3 | 0.3244 / 8 | 0.8722 / 632 | 0.9970 / 2018 | 0.9106 |
+| 4 | 0.3027 / 12 | 0.8199 / 552 | 0.9514 / 1873 | 0.8995 |
+| 5 | 0.2601 / 25 | 0.7085 / 673 | 0.8692 / 1935 | 0.8207 |
+| 6 | 0.5321 / 162 | 0.7205 / 939 | 0.8102 / 2103 | 0.8150 |
+| 7 | 0.1241 / 0 | 0.7294 / 765 | 0.7937 / 1411 | 0.7346 |
 
 ## Test-Oracle Diagnostics (Not Reportable)
 
@@ -34,6 +34,6 @@ These entries retrospectively choose an epoch on test data and are diagnostics o
 
 | nominal FPR budget | test-selected epoch | recovery | observed test FPR |
 |---|---:|---:|---:|
-| 1% | 6 | 0.3311 | 0.3996% |
-| 5% | 2 | 0.7064 | 5.9870% |
-| 10% | 2 | 0.8446 | 8.6679% |
+| 1% | 1 | 0.7339 | 0.7821% |
+| 5% | 1 | 0.9372 | 4.8648% |
+| 10% | 1 | 0.9985 | 10.5364% |

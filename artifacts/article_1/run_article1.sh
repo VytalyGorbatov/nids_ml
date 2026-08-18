@@ -48,18 +48,18 @@ RUNS=(
 # echo "╔══════════════════════════════════════════════════════════════╗"
 # echo "║ Stage 1  Shared U-only SSL pretraining (30 epochs)             ║"
 # echo "╚══════════════════════════════════════════════════════════════╝"
-# mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
-# PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
-# ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
-#     --config "$PRETRAIN_CFG" \
-#     --device cuda ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
-# pretrain_rc=${PIPESTATUS[0]}
+mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
+PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
+( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
+    --config "$PRETRAIN_CFG" \
+    --device cuda ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
+pretrain_rc=${PIPESTATUS[0]}
 
-# if [[ $pretrain_rc -ne 0 ]]; then
-#   rm -f "$PRETRAIN_MARKER"
-#   echo "ERROR: Stage-1 pretraining failed (rc=$pretrain_rc)"
-#   exit "$pretrain_rc"
-# fi
+if [[ $pretrain_rc -ne 0 ]]; then
+  rm -f "$PRETRAIN_MARKER"
+  echo "ERROR: Stage-1 pretraining failed (rc=$pretrain_rc)"
+  exit "$pretrain_rc"
+fi
 
 pretrain_epoch=-1
 for checkpoint in "$PKG_DIR/$PRETRAIN_DIR"/pretrain_epoch*.pt; do
@@ -73,13 +73,13 @@ for checkpoint in "$PKG_DIR/$PRETRAIN_DIR"/pretrain_epoch*.pt; do
   fi
 done
 echo "Latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
-# rm -f "$PRETRAIN_MARKER"
+rm -f "$PRETRAIN_MARKER"
 
-# if [[ -z "$PRETRAIN" ]]; then
-#   echo "ERROR: no new pretrained checkpoint found in $PKG_DIR/$PRETRAIN_DIR"
-#   exit 1
-# fi
-# echo "Using latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
+if [[ -z "$PRETRAIN" ]]; then
+  echo "ERROR: no new pretrained checkpoint found in $PKG_DIR/$PRETRAIN_DIR"
+  exit 1
+fi
+echo "Using latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
 
 # ─── B0: Snort anchor (computed, no training) ───────────────────────────────
 echo "╔══════════════════════════════════════════════════════════════╗"

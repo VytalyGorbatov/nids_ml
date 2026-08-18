@@ -3,14 +3,14 @@
     "out_dir": "./artifacts/article_1/runs/full_backbone_pu"
   },
   "attack_paths": {
-    "test": "../sip-dataset/attack/test.json",
-    "train": "../sip-dataset/attack/train.json",
-    "val": "../sip-dataset/attack/val.json"
+    "test": "../sip-dataset/general_split/attack/test.json",
+    "train": "../sip-dataset/general_split/attack/train.json",
+    "val": "../sip-dataset/general_split/attack/val.json"
   },
   "benign_paths": {
-    "test": "../sip-dataset/benign/test.json",
-    "train": "../sip-dataset/benign/train.json",
-    "val": "../sip-dataset/benign/val.json"
+    "test": "../sip-dataset/general_split/benign/test.json",
+    "train": "../sip-dataset/general_split/benign/train.json",
+    "val": "../sip-dataset/general_split/benign/val.json"
   },
   "data": {
     "buffer_field": "buffers",
