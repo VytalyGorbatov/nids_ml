@@ -1,0 +1,17 @@
+{
+  "best_val_metrics": {},
+  "pretrain_val": {
+    "average_precision": 0.057707501855502934,
+    "best_f1": 0.1529517024755478,
+    "best_threshold": 0.21241752803325653,
+    "pr_auc": 0.057707501855502934,
+    "precision_at_best": 0.08283378928899765,
+    "recall_at_best": 0.996358335018158,
+    "snort_fn_count": 686,
+    "snort_fn_f1": 0.08270767740372971,
+    "snort_fn_precision": 0.043145925457991154,
+    "snort_fn_recall": 0.9956268221574344,
+    "snort_fn_recovered": 683
+  },
+  "test_metrics": {}
+}

@@ -28,11 +28,11 @@ PKG_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"     # .../nids_ml
 WS_ROOT="$(cd "$PKG_DIR/.." && pwd)"           # .../NeuralNetworks
 
 PYTHON_BIN="/home/vhorbato/.pyvenv/bin/python3"  # full path to python binary (must have torch, sklearn, etc.)
-PRETRAIN_CFG="artifacts/article_1/configs/pretrain_uonly_ssl.json"
-PRETRAIN_DIR="artifacts/article_1/pretrain"
+PRETRAIN_CFG="artifacts/article_1/configs/mutation-set/pretrain_uonly_ssl.json"
+PRETRAIN_DIR="artifacts/article_1/pretrain_mutation"
 PRETRAIN=""
-CFG_DIR="artifacts/article_1/configs"             # relative to PKG_DIR
-RUNS_DIR="artifacts/article_1/runs/w_alert_0_0_5"   # relative to PKG_DIR
+CFG_DIR="artifacts/article_1/configs/mutation-set"             # relative to PKG_DIR
+RUNS_DIR="artifacts/article_1/runs/mutation-set"   # relative to PKG_DIR
 BUDGETS="0.01,0.05,0.10"
 
 # Run list: "config_basename:use_pretrained(1|0)"
@@ -76,7 +76,7 @@ echo "Latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
 rm -f "$PRETRAIN_MARKER"
 
 if [[ -z "$PRETRAIN" ]]; then
-  echo "ERROR: no new pretrained checkpoint found in $PKG_DIR/$PRETRAIN_DIR"
+  echo "ERROR: no mutation pretrained checkpoint found in $PKG_DIR/$PRETRAIN_DIR"
   exit 1
 fi
 echo "Using latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
@@ -164,7 +164,7 @@ for entry in "${RUNS[@]}"; do
     RESULTS+=("OK    $name [${mins}m]")
     PASS=$((PASS+1))
   fi
-done
+done"
 
 # ─── Summary ────────────────────────────────────────────────────────────────
 camp_mins=$(( ($(date +%s)-CAMP_START)/60 ))

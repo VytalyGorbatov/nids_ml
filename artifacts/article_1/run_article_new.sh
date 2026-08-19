@@ -28,11 +28,11 @@ PKG_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"     # .../nids_ml
 WS_ROOT="$(cd "$PKG_DIR/.." && pwd)"           # .../NeuralNetworks
 
 PYTHON_BIN="/home/vhorbato/.pyvenv/bin/python3"  # full path to python binary (must have torch, sklearn, etc.)
-PRETRAIN_CFG="artifacts/article_1/configs/pretrain_uonly_ssl.json"
-PRETRAIN_DIR="artifacts/article_1/pretrain"
+PRETRAIN_CFG="artifacts/article_1/configs/new-set/pretrain_uonly_ssl.json"
+PRETRAIN_DIR="artifacts/article_1/pretrain_new"
 PRETRAIN=""
-CFG_DIR="artifacts/article_1/configs"             # relative to PKG_DIR
-RUNS_DIR="artifacts/article_1/runs/w_alert_0_0_5"   # relative to PKG_DIR
+CFG_DIR="artifacts/article_1/configs/new-set"             # relative to PKG_DIR
+RUNS_DIR="artifacts/article_1/runs/new-set"   # relative to PKG_DIR
 BUDGETS="0.01,0.05,0.10"
 
 # Run list: "config_basename:use_pretrained(1|0)"
@@ -135,7 +135,7 @@ for entry in "${RUNS[@]}"; do
   ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
       --config "$CFG_DIR/$name.json" \
       "${pt_args[@]}" \
-      --device cuda ) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
+      --device cuda) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
   train_rc=${PIPESTATUS[0]}
 
   if [[ $train_rc -ne 0 ]]; then
@@ -164,7 +164,7 @@ for entry in "${RUNS[@]}"; do
     RESULTS+=("OK    $name [${mins}m]")
     PASS=$((PASS+1))
   fi
-done
+done"
 
 # ─── Summary ────────────────────────────────────────────────────────────────
 camp_mins=$(( ($(date +%s)-CAMP_START)/60 ))
