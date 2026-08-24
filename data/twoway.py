@@ -70,6 +70,9 @@ class PseudoPositiveBatchSampler:
         self.native_per_batch = batch_size - self.pp_per_batch
         # Drop the last partial batch so every batch is exactly batch_size.
         self.n_batches = len(p_records) // batch_size
+        # Captured once so epochs stay reproducible while still differing.
+        self.base_seed = torch.initial_seed()
+        self._epoch = 0
 
         logger.info(
             "PseudoPositiveBatchSampler: %d native, %d PP, "
@@ -84,10 +87,11 @@ class PseudoPositiveBatchSampler:
         )
 
     def __iter__(self):
-        # Seed a per-epoch generator from the global seed so each epoch gets a
-        # different permutation while remaining fully reproducible.
+        # Offset the base seed by the epoch counter so every epoch draws a
+        # different permutation while the whole run stays reproducible.
         g = torch.Generator()
-        g.manual_seed(torch.initial_seed())
+        g.manual_seed(self.base_seed + self._epoch)
+        self._epoch += 1
 
         # ── Native indices: one random permutation, tiled cyclically ──────
         # This ensures each native P sample appears roughly once per epoch
@@ -153,21 +157,46 @@ class TwoWayDatasetBuilder:
             return [Path(p) for p in val]
         raise TypeError(f"Invalid path type: {type(val)}")
 
-    def _load_records_from_file(self, path: Path) -> List[Dict[str, Any]]:
+    def _load_records_from_file(self, path: Path) -> tuple[List[Dict[str, Any]], int]:
+        """Return usable records tagged with their original on-disk position.
+
+        Records without the buffer field are skipped, but the surviving records
+        keep their original index so ``source_index`` stays aligned with the
+        file order that provenance-join tooling indexes into.
+        """
         with path.open("r", encoding="utf-8") as f:
             obj = json.load(f)
         dataset = obj.get("dataset", [])
         if not isinstance(dataset, list):
             logger.error("File %s invalid: 'dataset' is not a list", path)
-            return []
-        return [rec for rec in dataset if isinstance(rec, dict) and self.cfg.buffer_field in rec]
+            return [], 0
+
+        usable: List[Dict[str, Any]] = []
+        for position, record in enumerate(dataset):
+            if isinstance(record, dict) and self.cfg.buffer_field in record:
+                record["_file_position"] = position
+                usable.append(record)
+        if len(usable) != len(dataset):
+            logger.warning(
+                "File %s: skipped %d record(s) without field %r; source_index "
+                "still follows on-disk order.",
+                path, len(dataset) - len(usable), self.cfg.buffer_field,
+            )
+        return usable, len(dataset)
 
     def _load_split_records(self, split: str) -> List[Dict[str, Any]]:
         benign = self._ensure_path_list(self.config.get("benign_paths", {}).get(split))
         attack = self._ensure_path_list(self.config.get("attack_paths", {}).get(split))
         records: List[Dict[str, Any]] = []
-        for p in benign + attack:
-            records.extend(self._load_records_from_file(p))
+        for source_class, paths in (("benign", benign), ("attack", attack)):
+            offset = 0
+            for path in paths:
+                source_records, file_length = self._load_records_from_file(path)
+                for record in source_records:
+                    record["source_index"] = offset + record.pop("_file_position")
+                    record["source_class"] = source_class
+                offset += file_length
+                records.extend(source_records)
         return records
 
     @staticmethod
@@ -433,22 +462,16 @@ class TwoWayDatasetBuilder:
         }
         return loaders
 
-    # ── supervised (single labelled train loader) ───
+    # ── full-train loaders (supervised baselines, Stage-1) ───
 
-    def build_supervised_loader(self) -> DataLoader:
+    def _build_full_train_loader(self, purpose: str) -> DataLoader:
         """Build a shuffled loader over the FULL training set (P ∪ U, unsplit).
 
-        Supervised baselines (teacher-copy on ``alerted`` / oracle on
-        ``is_attack``) need one labelled loader over every training sample
-        rather than the P/U pair used by nnPU.  The union of P and U is exactly
-        the raw ``train`` split, so we load it directly and skip the
-        pseudo-positive manifest entirely: promotion flips ``alerted`` for mined
-        U samples, which would corrupt the teacher-copy target.  ``is_attack``
-        and ``alerted`` therefore carry their original ground-truth values.
-
-        The batch schema is identical to ``build_loaders`` (same dataset class
-        and collate fn), so the trainer and per-sample prognosis code are
-        reused unchanged.  The P/U path in ``build_loaders`` is not touched.
+        The pseudo-positive manifest is deliberately skipped: promotion flips
+        ``alerted`` for mined U samples, which would corrupt both the
+        teacher-copy target and the Stage-1 auxiliary target.  ``is_attack`` and
+        ``alerted`` therefore carry their original values.  The batch schema
+        matches ``build_loaders`` so trainers and prognosis code are unchanged.
         """
         training_cfg = self.config.get("training", {})
         batch_size = int(training_cfg.get("batch_size", 256))
@@ -458,8 +481,8 @@ class TwoWayDatasetBuilder:
         n_pos = sum(1 for r in train_records if int(r.get("alerted", 0)) == 1)
         n_att = sum(1 for r in train_records if int(r.get("is_attack", 0)) == 1)
         logger.info(
-            "Supervised train (all): %d records (alerted=1: %d, is_attack=1: %d)",
-            len(train_records), n_pos, n_att,
+            "%s train (all): %d records (alerted=1: %d, is_attack=1: %d)",
+            purpose, len(train_records), n_pos, n_att,
         )
 
         ds_all = TwoWayRecordDataset(train_records, self.cfg)
@@ -471,3 +494,16 @@ class TwoWayDatasetBuilder:
             num_workers=num_workers,
             collate_fn=collate,
         )
+
+    def build_supervised_loader(self) -> DataLoader:
+        """Labelled loader for the supervised baselines (teacher-copy/oracle)."""
+        return self._build_full_train_loader("Supervised")
+
+    def build_pretrain_loader(self) -> DataLoader:
+        """Loader for Stage 1.
+
+        Stage 1 mixes a contrastive term with an auxiliary BCE term against the
+        teacher flag.  Running it over the U split alone would make that target
+        constant-zero, so the auxiliary task must see the full train split.
+        """
+        return self._build_full_train_loader("Pretrain")

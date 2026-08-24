@@ -17,6 +17,7 @@ from ..data.common import to_device
 from ..data import TwoWayDatasetBuilder
 from ..models import build_model
 from ..training.twoway import TwoWayTrainer, eval_on_loader_at_threshold
+from ..training.losses import unlabeled_prior_from_pool
 from ..training.calibration import BaseCalibrator, IsotonicCalibrator, PlattCalibrator, PriorCorrectionCalibrator, pick_best_calibrator
 
 logger = logging.getLogger(__name__)
@@ -25,9 +26,50 @@ logger = logging.getLogger(__name__)
 class TwoWayPipeline:
     """High-level pipeline for the 2-Way ByteTCN model."""
 
+    #: Stage-2 modes that keep part of the backbone permanently frozen, so a
+    #: missing Stage-1 initialisation would leave random weights frozen.
+    _FROZEN_BACKBONE_MODES = {"head", "head_last_block", "backbone_hybrid"}
+
     def __init__(self, config: Dict[str, Any], device: torch.device) -> None:
         self.config = config
         self.device = device
+
+    def _check_backbone_initialisation(
+        self, training_cfg: Dict[str, Any], pretrained_path: Optional[str],
+    ) -> None:
+        """Reject silently-random frozen backbones.
+
+        With no Stage-1 epochs and no checkpoint the backbone stays randomly
+        initialised; under a freezing Stage-2 mode those random weights are
+        never trained, which quietly turns a capacity study into an
+        initialisation study.
+        """
+        if pretrained_path or int(training_cfg.get("max_epochs_pretrain", 0)) > 0:
+            return
+
+        mode = str(training_cfg.get("stage2_trainable", "full"))
+        if bool(training_cfg.get("freeze_backbone", False)) and "stage2_trainable" not in training_cfg:
+            mode = "head"
+        if mode not in self._FROZEN_BACKBONE_MODES:
+            logger.warning(
+                "No Stage-1 pretraining and no --pretrained checkpoint: the "
+                "backbone starts from random weights."
+            )
+            return
+        if bool(training_cfg.get("allow_random_frozen_backbone", False)):
+            logger.warning(
+                "Stage-2 mode %r freezes an untrained backbone; continuing "
+                "because allow_random_frozen_backbone=true.", mode,
+            )
+            return
+        raise ValueError(
+            f"Stage-2 mode {mode!r} freezes part of the backbone, but no "
+            "Stage-1 weights were provided (max_epochs_pretrain=0 and no "
+            "--pretrained). The frozen layers would stay randomly initialised "
+            "and results would not be comparable to pretrained runs. Pass "
+            "--pretrained, set max_epochs_pretrain>0, or set "
+            "training.allow_random_frozen_backbone=true to accept this."
+        )
 
     def run(
         self,
@@ -35,6 +77,9 @@ class TwoWayPipeline:
         pretrained_path: Optional[str] = None,
     ) -> Tuple[Dict[str, Any], Dict[str, float], Dict[str, float]]:
         # 1. Build data loaders
+        training_cfg = self.config.get("training", {})
+        self._check_backbone_initialisation(training_cfg, pretrained_path)
+
         builder = TwoWayDatasetBuilder(self.config)
         loaders = builder.build_loaders()
 
@@ -43,7 +88,6 @@ class TwoWayPipeline:
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # 2. Build model via factory
-        training_cfg = self.config.get("training", {})
         model = build_model(self.config)
 
         n_params = sum(p.numel() for p in model.parameters())
@@ -51,6 +95,16 @@ class TwoWayPipeline:
 
         # 3. Train — optionally skip Stage 1 by loading a pretrained checkpoint
         trainer = TwoWayTrainer(model, self.device, training_cfg)
+
+        # Recorded so artifacts state whether Stage-1 weights were used.
+        self.config["stage1_provenance"] = {
+            "pretrained_path": pretrained_path,
+            "max_epochs_pretrain": int(training_cfg.get("max_epochs_pretrain", 0)),
+            "random_init": bool(
+                not pretrained_path
+                and int(training_cfg.get("max_epochs_pretrain", 0)) == 0
+            ),
+        }
 
         if pretrained_path:
             pt_path = Path(pretrained_path)
@@ -61,7 +115,8 @@ class TwoWayPipeline:
             logger.info("Skipping Stage 1; loaded pretrained weights.")
         else:
             pretrain_stats = trainer.pretrain(
-                loaders["train_u"], loaders["val"], out_dir, stop_flag=stop_flag,
+                builder.build_pretrain_loader(), loaders["val"], out_dir,
+                stop_flag=stop_flag,
             )
 
         if bool(training_cfg.get("pretrain_only", False)):
@@ -77,8 +132,19 @@ class TwoWayPipeline:
         stage2_objective = str(training_cfg.get("stage2_objective", "pu"))
         if stage2_objective == "supervised":
             train_all = builder.build_supervised_loader()
+            paired = str(
+                training_cfg.get("supervised_batch_balance", "natural")
+            ) == "match_pu"
+            if paired and training_cfg.get("pseudo_positive_manifest"):
+                raise ValueError(
+                    "supervised_batch_balance='match_pu' cannot be combined "
+                    "with pseudo_positive_manifest: promotion flips 'alerted' "
+                    "in the P loader and would corrupt the supervised target."
+                )
             best_val, best_path = trainer.train_supervised(
                 train_all, loaders["val"], out_dir, stop_flag=stop_flag,
+                loader_p=loaders["train_p"] if paired else None,
+                loader_u=loaders["train_u"] if paired else None,
             )
         else:
             best_val, best_path = trainer.train_pu(
@@ -94,8 +160,10 @@ class TwoWayPipeline:
 
         # Collect val logits for calibration
         val_logits, val_labels = self._collect_logits(model, loaders["val"])
-        pi_train = float(training_cfg.get("pi_p", training_cfg.get("pu_prior", 0.10)))
-        calibrator = pick_best_calibrator(val_logits, val_labels)
+        # The prior-correction candidate must re-reference the prior the risk
+        # head was actually trained under, not the config default.
+        pi_train = float(trainer.pi_p_effective)
+        calibrator = pick_best_calibrator(val_logits, val_labels, pi_train=pi_train)
         calibrator.save(out_dir / "calibrator.json")
 
         # Evaluate test with calibrated threshold (0.5 on calibrated scores)
@@ -225,6 +293,9 @@ class TwoWayPipeline:
             is_attack = batch.get("is_attack")
             alerted = batch.get("alerted")
             call_ids = batch.get("call_id")
+            source_indices = batch.get("source_index")
+            source_classes = batch.get("source_class")
+            buffer_hashes = batch.get("buffer_sha256")
 
             for i in range(n):
                 row: dict[str, Any] = {
@@ -234,6 +305,12 @@ class TwoWayPipeline:
                     "raw_score": round(float(scores[i].item()), 4),
                     "calibrated_score": round(float(cal_scores[i].item()), 4),
                 }
+                if source_indices is not None:
+                    row["source_index"] = int(source_indices[i].item())
+                if source_classes is not None:
+                    row["source_class"] = source_classes[i]
+                if buffer_hashes is not None:
+                    row["buffer_sha256"] = buffer_hashes[i]
                 if is_attack is not None:
                     row["is_attack"] = int(is_attack[i].item())
                 if alerted is not None:
@@ -275,6 +352,15 @@ class TwoWayPipeline:
         val_logits, val_labels = self._collect_logits(model, loaders["val"])
         training_cfg = self.config.get("training", {})
         pi_train = float(training_cfg.get("pi_p", training_cfg.get("pu_prior", 0.10)))
+        if (
+            str(training_cfg.get("stage2_objective", "pu")) == "pu"
+            and str(training_cfg.get("pi_p_scope", "pool")) == "pool"
+        ):
+            pi_train = unlabeled_prior_from_pool(
+                pi_train,
+                len(loaders["train_p"].dataset),
+                len(loaders["train_u"].dataset),
+            )
 
         logger.info("Fitting calibrators...")
         calibrator = pick_best_calibrator(val_logits, val_labels, pi_train=pi_train)

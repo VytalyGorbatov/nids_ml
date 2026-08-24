@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import random
 import re
+from hashlib import sha256
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -47,6 +48,11 @@ def decode_buffers_field(x: Any) -> List[int]:
         return list(x.encode("latin1", errors="ignore"))
 
     raise TypeError(f"Unsupported buffers field type: {type(x)}")
+
+
+def buffer_sha256(buffer_value: Any) -> str:
+    """Hash the decoded model-input bytes using a stable SHA-256 policy."""
+    return sha256(bytes(decode_buffers_field(buffer_value))).hexdigest()
 
 
 def extract_record_call_id(record: Dict[str, Any], buffer_field: str) -> Optional[str]:
@@ -145,6 +151,9 @@ class TwoWayRecordDataset(Dataset):
             "header_ids": header_ids,
             "body_ids": body_ids,
             "call_id": extract_record_call_id(r, self.cfg.buffer_field),
+            "source_index": int(r.get("source_index", idx)),
+            "source_class": r.get("source_class"),
+            "buffer_sha256": buffer_sha256(r[self.cfg.buffer_field]),
             "alerted": int(r.get("alerted", 0)),
             "is_attack": int(r.get("is_attack", 0)),
             "loss_weight": float(r.get("loss_weight", 1.0)),
@@ -166,11 +175,35 @@ def twoway_collate_fn(
         "header_mask": header.ne(PAD_IDX),
         "body_mask": body.ne(PAD_IDX),
         "call_id": [b.get("call_id") for b in batch],
+        "source_index": torch.tensor([b["source_index"] for b in batch], dtype=torch.long),
+        "source_class": [b.get("source_class") for b in batch],
+        "buffer_sha256": [b.get("buffer_sha256") for b in batch],
         "alerted": torch.tensor([b["alerted"] for b in batch], dtype=torch.float32),
         "is_attack": torch.tensor([b["is_attack"] for b in batch], dtype=torch.float32),
         "loss_weight": torch.tensor([b.get("loss_weight", 1.0) for b in batch], dtype=torch.float32),
         "pseudo_positive": torch.tensor([b.get("pseudo_positive", 0) for b in batch], dtype=torch.long),
     }
+
+
+def concat_batches(
+    first: Dict[str, Any], second: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Concatenate two collated batches that share the same schema.
+
+    Lets a supervised objective consume the same P/U batch pairing that the
+    nnPU loop uses, so positive-exposure per step is identical across
+    objectives.
+    """
+    merged: Dict[str, Any] = {}
+    for key, value in first.items():
+        other = second[key]
+        if isinstance(value, torch.Tensor):
+            merged[key] = torch.cat([value, other], dim=0)
+        elif isinstance(value, list):
+            merged[key] = value + other
+        else:
+            merged[key] = value
+    return merged
 
 
 # ─── Byte augmentations for SSL ──────────────────────

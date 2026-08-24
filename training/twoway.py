@@ -14,9 +14,9 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from ..data.common import augment_ids, to_device
+from ..data.common import augment_ids, concat_batches, to_device
 from .base import BaseTrainer, EarlyStopper
-from .losses import contrastive_nt_xent, nnpu_loss
+from .losses import contrastive_nt_xent, nnpu_loss, unlabeled_prior_from_pool
 from .metrics import pr_curve_best_f1, snort_fn_metrics
 from ..models.tcn_2way import ByteTCN2WayClassifier, ByteTCNBackbone, Heads
 
@@ -152,6 +152,20 @@ class TwoWayTrainer(BaseTrainer):
         self.pi_p = float(training_cfg.get("pi_p", training_cfg.get("pu_prior", 0.10)))
         self.temp = float(training_cfg.get("temp", 0.2))
 
+        # ── nnPU prior scope + de-fitting controls ──────
+        # nnPU needs the positive prior *within* the unlabeled sample. Configs
+        # normally state the pool-wide prior, so "pool" (the default) converts
+        # it using the observed |P| / |U| sizes; "unlabeled" passes it through.
+        self.pi_p_scope = str(training_cfg.get("pi_p_scope", "pool"))
+        if self.pi_p_scope not in {"pool", "unlabeled"}:
+            raise ValueError(
+                "pi_p_scope must be 'pool' or 'unlabeled'; "
+                f"got {self.pi_p_scope!r}"
+            )
+        self.pi_p_effective = self.pi_p
+        self.nnpu_beta = float(training_cfg.get("nnpu_beta", 0.0))
+        self.nnpu_gamma = float(training_cfg.get("nnpu_gamma", 1.0))
+
         self.all_params = list(self.model.parameters())
         self.sched_cfg = {"factor": 0.5, "patience": 3, "min_lr": 1e-6}
         self.best_metric = str(training_cfg.get("best_metric", "pr_auc"))
@@ -222,6 +236,18 @@ class TwoWayTrainer(BaseTrainer):
                     f"got {self.supervised_target!r}"
                 )
 
+        # Supervised batch composition. "natural" draws from the raw training
+        # distribution; "match_pu" reuses the nnPU P/U batch pairing so both
+        # objectives see the same number of positives per step.
+        self.supervised_batch_balance = str(
+            training_cfg.get("supervised_batch_balance", "natural")
+        )
+        if self.supervised_batch_balance not in {"natural", "match_pu"}:
+            raise ValueError(
+                "supervised_batch_balance must be 'natural' or 'match_pu'; "
+                f"got {self.supervised_batch_balance!r}"
+            )
+
         # Populated by ``_setup_stage2_trainability`` at the start of train_pu.
         self._trainable_params: list = self.all_params
         self._frozen_modules: list = []
@@ -277,6 +303,46 @@ class TwoWayTrainer(BaseTrainer):
                 return next(iterator), iterator
             except StopIteration as exc:
                 raise ValueError("Stage-2 training loader must not be empty") from exc
+
+    @staticmethod
+    def _loader_records(loader: DataLoader) -> Optional[list]:
+        dataset = getattr(loader, "dataset", None)
+        return getattr(dataset, "records", None)
+
+    @classmethod
+    def _count_alerted(cls, loader: DataLoader) -> Optional[int]:
+        records = cls._loader_records(loader)
+        if records is None:
+            return None
+        return sum(1 for r in records if int(r.get("alerted", 0)) == 1)
+
+    def _resolve_pu_prior(self, n_p: int, n_u: int) -> float:
+        """Return the prior to feed nnPU, converting pool scope when needed."""
+        if self.pi_p_scope == "unlabeled":
+            logger.info(
+                "PU prior: using configured unlabeled-scope pi=%.4f "
+                "(|P|=%d, |U|=%d)", self.pi_p, n_p, n_u,
+            )
+            return self.pi_p
+
+        pi_u = unlabeled_prior_from_pool(self.pi_p, n_p, n_u)
+        logger.info(
+            "PU prior: pool pi=%.4f -> unlabeled pi=%.4f (|P|=%d, |U|=%d); "
+            "nnPU requires the prior inside U",
+            self.pi_p, pi_u, n_p, n_u,
+        )
+        return pi_u
+
+    @staticmethod
+    def _log_positive_exposure(
+        objective: str, positives_per_epoch: float, n_p: int,
+    ) -> None:
+        passes = positives_per_epoch / max(n_p, 1)
+        logger.info(
+            "Positive exposure [%s]: ~%.0f positive samples/epoch = %.2f "
+            "pass(es) over |P|=%d",
+            objective, positives_per_epoch, passes, n_p,
+        )
 
     # ── Stage 2 trainability / plasticity ───────────
 
@@ -430,7 +496,7 @@ class TwoWayTrainer(BaseTrainer):
 
     def pretrain(
         self,
-        loader_u: DataLoader,
+        loader_train: DataLoader,
         loader_val: DataLoader,
         out_dir: Path,
         stop_flag: Optional[Callable[[], bool]] = None,
@@ -442,6 +508,17 @@ class TwoWayTrainer(BaseTrainer):
         self._reset_optimizer()
         best_val: Dict[str, float] = {}
 
+        # The auxiliary head is only informative if the teacher flag varies.
+        w_alert = self.w_alert
+        n_alerted = self._count_alerted(loader_train)
+        if w_alert > 0.0 and n_alerted == 0:
+            logger.warning(
+                "Stage-1 auxiliary alert target is constant zero (the loader "
+                "holds no alerted=1 records); disabling it. Pretrain over the "
+                "full train split to keep this term meaningful."
+            )
+            w_alert = 0.0
+
         for epoch in range(self.max_epochs_pretrain):
             if stop_flag and stop_flag():
                 logger.info("Stop signal; exiting pretrain.")
@@ -452,7 +529,7 @@ class TwoWayTrainer(BaseTrainer):
             total_loss = 0.0
             n = 0
 
-            for batch in loader_u:
+            for batch in loader_train:
                 if stop_flag and stop_flag():
                     break
                 batch = to_device(batch, self.device)
@@ -468,10 +545,11 @@ class TwoWayTrainer(BaseTrainer):
                 loss_ssl = contrastive_nt_xent(
                     out1["proj"], out2["proj"], temperature=self.temp,
                 )
-                loss_alert = F.binary_cross_entropy_with_logits(
-                    out1["alerted_logit"], batch["alerted"],
-                )
-                loss = self.w_ssl * loss_ssl + self.w_alert * loss_alert
+                loss = self.w_ssl * loss_ssl
+                if w_alert > 0.0:
+                    loss = loss + w_alert * F.binary_cross_entropy_with_logits(
+                        out1["alerted_logit"], batch["alerted"],
+                    )
 
                 self._do_optim_step(loss)
                 total_loss += float(loss.detach())
@@ -512,12 +590,19 @@ class TwoWayTrainer(BaseTrainer):
             "== Stage 2: nnPU training (%d epochs, π=%.3f) ==",
             self.max_epochs_pu, self.pi_p,
         )
+        n_p = len(loader_p.dataset)
+        n_u = len(loader_u.dataset)
+        self.pi_p_effective = self._resolve_pu_prior(n_p, n_u)
         param_groups = self._setup_stage2_trainability()
         self._reset_optimizer(param_groups=param_groups)
         stopper = EarlyStopper(patience=self.patience, mode="max")
         best_path = out_dir / "model_best.pt"
         best_pr_auc = -1.0
         best_val: Dict[str, float] = {}
+        steps_per_epoch = self.stage2_steps_per_epoch or len(loader_p)
+        self._log_positive_exposure(
+            "nnPU", steps_per_epoch * loader_p.batch_size, n_p,
+        )
 
         for epoch in range(self.max_epochs_pu):
             if stop_flag and stop_flag():
@@ -531,6 +616,7 @@ class TwoWayTrainer(BaseTrainer):
             self._set_frozen_eval()
             total = 0.0
             n = 0
+            n_defit = 0
 
             iter_p = iter(loader_p)
             iter_u = iter(loader_u)
@@ -550,10 +636,14 @@ class TwoWayTrainer(BaseTrainer):
                 out_p = self.heads(z_p)
                 out_u = self.heads(z_u)
 
-                loss_pu, _ = nnpu_loss(
-                    out_p["risk_logit"], out_u["risk_logit"], pi_p=self.pi_p,
+                loss_pu, pu_stats = nnpu_loss(
+                    out_p["risk_logit"], out_u["risk_logit"],
+                    pi_p=self.pi_p_effective,
                     p_weights=batch_p.get("loss_weight"),
+                    beta=self.nnpu_beta,
+                    gamma=self.nnpu_gamma,
                 )
+                n_defit += int(pu_stats["defitting"])
                 loss_alert = (
                     F.binary_cross_entropy_with_logits(
                         out_p["alerted_logit"], batch_p["alerted"],
@@ -611,10 +701,10 @@ class TwoWayTrainer(BaseTrainer):
             fn_recall = val_stats.get("snort_fn_recall", 0.0)
             logger.info(
                 "[nnPU epoch %d] steps=%d loss=%.4f %s=%.4f bestF1=%.4f "
-                "fn_recall=%.4f thr=%.3f lr=%.2e",
+                "fn_recall=%.4f thr=%.3f lr=%.2e defit=%.0f%%",
                 epoch, n, total / max(1, n), self.best_metric, metric_val,
                 val_stats["best_f1"], fn_recall,
-                val_stats["best_threshold"], lr,
+                val_stats["best_threshold"], lr, 100.0 * n_defit / max(1, n),
             )
 
             if metric_val > best_pr_auc:
@@ -648,24 +738,28 @@ class TwoWayTrainer(BaseTrainer):
         loader_val: DataLoader,
         out_dir: Path,
         stop_flag: Optional[Callable[[], bool]] = None,
+        loader_p: Optional[DataLoader] = None,
+        loader_u: Optional[DataLoader] = None,
     ) -> Tuple[Dict[str, float], Path]:
         """Fully-supervised BCE baseline on the risk head.
 
         Trains ``heads.risk`` with plain ``BCEWithLogitsLoss`` against
         ``batch[self.supervised_target]`` (``alerted`` → teacher-copy of Snort,
         ``is_attack`` → oracle upper bound).  There is NO nnPU term, NO SSL
-        regulariser, NO alert-aux term, and NO P/U pairing — a single pass over
-        one labelled loader per epoch.
+        regulariser, NO alert-aux term.
 
-        Everything else mirrors :meth:`train_pu` exactly so the two objectives
-        are directly comparable: the same ``_setup_stage2_trainability`` /
-        ``_reset_optimizer`` path (so ``head_last_block`` etc. behave
-        identically), the same ``best_metric`` checkpointing to
-        ``model_best.pt``, the same per-epoch ``model_ep{e}.pt`` gating,
-        the same ``disable_early_stop`` / ``disable_plateau_sched`` handling,
-        and ``model_last.pt`` at the end.  Evaluation reuses
-        :func:`eval_on_loader` (risk-head metrics vs ``is_attack``) unchanged,
-        so checkpoint selection is on the same footing for every run.
+        Batch composition follows ``supervised_batch_balance``: ``"natural"``
+        draws from the raw training distribution via ``loader_train``, while
+        ``"match_pu"`` pairs a P batch with a U batch exactly as ``train_pu``
+        does, so both objectives see the same positives per step.
+
+        Everything else mirrors :meth:`train_pu` so the two objectives are
+        directly comparable: the same ``_setup_stage2_trainability`` /
+        ``_reset_optimizer`` path, the same ``best_metric`` checkpointing to
+        ``model_best.pt``, the same per-epoch ``model_ep{e}.pt`` gating, the
+        same ``disable_early_stop`` / ``disable_plateau_sched`` handling, and
+        ``model_last.pt`` at the end.  Evaluation reuses
+        :func:`eval_on_loader` unchanged.
 
         Returns ``(best_val, best_path)`` — identical contract to ``train_pu``.
         """
@@ -673,9 +767,17 @@ class TwoWayTrainer(BaseTrainer):
             "train_supervised requires supervised_target in {'alerted', "
             f"'is_attack'}}; got {self.supervised_target!r}"
         )
+        paired = self.supervised_batch_balance == "match_pu"
+        if paired and (loader_p is None or loader_u is None):
+            raise ValueError(
+                "supervised_batch_balance='match_pu' requires both loader_p "
+                "and loader_u"
+            )
         logger.info(
-            "== Stage 2: supervised BCE training (%d epochs, target=%s) ==",
+            "== Stage 2: supervised BCE training (%d epochs, target=%s, "
+            "batching=%s) ==",
             self.max_epochs_pu, self.supervised_target,
+            self.supervised_batch_balance,
         )
         param_groups = self._setup_stage2_trainability()
         self._reset_optimizer(param_groups=param_groups)
@@ -683,6 +785,21 @@ class TwoWayTrainer(BaseTrainer):
         best_path = out_dir / "model_best.pt"
         best_pr_auc = -1.0
         best_val: Dict[str, float] = {}
+
+        primary_loader = loader_p if paired else loader_train
+        steps_per_epoch = self.stage2_steps_per_epoch or len(primary_loader)
+        n_alerted = self._count_alerted(loader_train) or 0
+        if paired:
+            positives_per_epoch = float(steps_per_epoch * loader_p.batch_size)
+        else:
+            n_total = max(len(loader_train.dataset), 1)
+            positives_per_epoch = (
+                steps_per_epoch * loader_train.batch_size * n_alerted / n_total
+            )
+        self._log_positive_exposure(
+            f"supervised/{self.supervised_target}", positives_per_epoch,
+            max(n_alerted, 1),
+        )
 
         for epoch in range(self.max_epochs_pu):
             if stop_flag and stop_flag():
@@ -697,12 +814,16 @@ class TwoWayTrainer(BaseTrainer):
             total = 0.0
             n = 0
 
-            iter_train = iter(loader_train)
-            steps_this_epoch = self.stage2_steps_per_epoch or len(loader_train)
+            iter_train = iter(primary_loader)
+            iter_u = iter(loader_u) if paired else None
+            steps_this_epoch = steps_per_epoch
             for _ in range(steps_this_epoch):
                 if stop_flag and stop_flag():
                     break
-                batch, iter_train = self._next_batch(loader_train, iter_train)
+                batch, iter_train = self._next_batch(primary_loader, iter_train)
+                if paired:
+                    batch_u, iter_u = self._next_batch(loader_u, iter_u)
+                    batch = concat_batches(batch, batch_u)
                 batch = to_device(batch, self.device)
 
                 z = self.backbone(batch)
