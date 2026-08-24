@@ -21,9 +21,19 @@
 #              M3 vs A2 (Stage-1 SSL) | M3 vs A3 (Stage-2 SSL)
 #
 # mps stability: runs sequentially, one at a time, foreground.
-# Usage:  bash nids_ml/artifacts/article_1/run_article1.sh
+# Usage:  bash nids_ml/artifacts/article_1/run_article_new.sh [--dry-run]
 # ────────────────────────────────────────────────────────────────────────────
 set -uo pipefail
+
+DRY_RUN=0
+case "${1:-}" in
+  "") ;;
+  --dry-run) DRY_RUN=1 ;;
+  *)
+    echo "Usage: $0 [--dry-run]"
+    exit 2
+    ;;
+esac
 
 # ─── Paths ──────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -53,44 +63,53 @@ RUNS=(
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║ Stage 1  Shared U-only SSL pretraining (30 epochs)             ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
-mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
-PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
-( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
-    --config "$PRETRAIN_CFG" \
-    --device mps ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
-pretrain_rc=${PIPESTATUS[0]}
+if (( DRY_RUN )); then
+  echo "DRY-RUN: (cd $PKG_DIR && $PYTHON_BIN classifier_creator.py --config $PRETRAIN_CFG --device mps)"
+  PRETRAIN="$PRETRAIN_DIR/pretrain_epoch<N>.pt"
+  echo "DRY-RUN: later runs will use the latest checkpoint under $PRETRAIN_DIR"
+else
+  mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
+  PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
+  ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
+      --config "$PRETRAIN_CFG" \
+      --device mps ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
+  pretrain_rc=${PIPESTATUS[0]}
 
-if [[ $pretrain_rc -ne 0 ]]; then
-  rm -f "$PRETRAIN_MARKER"
-  echo "ERROR: Stage-1 pretraining failed (rc=$pretrain_rc)"
-  exit "$pretrain_rc"
-fi
-
-pretrain_epoch=-1
-for checkpoint in "$PKG_DIR/$PRETRAIN_DIR"/pretrain_epoch*.pt; do
-  [[ -f "$checkpoint" ]] || continue
-  epoch="${checkpoint##*pretrain_epoch}"
-  epoch="${epoch%.pt}"
-  [[ "$epoch" =~ ^[0-9]+$ ]] || continue
-  if (( 10#$epoch > pretrain_epoch )); then
-    pretrain_epoch=$((10#$epoch))
-    PRETRAIN="${checkpoint#"$PKG_DIR/"}"
+  if [[ $pretrain_rc -ne 0 ]]; then
+    rm -f "$PRETRAIN_MARKER"
+    echo "ERROR: Stage-1 pretraining failed (rc=$pretrain_rc)"
+    exit "$pretrain_rc"
   fi
-done
-echo "Latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
-rm -f "$PRETRAIN_MARKER"
 
-if [[ -z "$PRETRAIN" ]]; then
-  echo "ERROR: no new pretrained checkpoint found in $PKG_DIR/$PRETRAIN_DIR"
-  exit 1
+  pretrain_epoch=-1
+  for checkpoint in "$PKG_DIR/$PRETRAIN_DIR"/pretrain_epoch*.pt; do
+    [[ -f "$checkpoint" ]] || continue
+    epoch="${checkpoint##*pretrain_epoch}"
+    epoch="${epoch%.pt}"
+    [[ "$epoch" =~ ^[0-9]+$ ]] || continue
+    if (( 10#$epoch > pretrain_epoch )); then
+      pretrain_epoch=$((10#$epoch))
+      PRETRAIN="${checkpoint#"$PKG_DIR/"}"
+    fi
+  done
+  echo "Latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
+  rm -f "$PRETRAIN_MARKER"
+
+  if [[ -z "$PRETRAIN" ]]; then
+    echo "ERROR: no new pretrained checkpoint found in $PKG_DIR/$PRETRAIN_DIR"
+    exit 1
+  fi
+  echo "Using latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
 fi
-echo "Using latest Stage-1 checkpoint: $PRETRAIN (epoch $pretrain_epoch)"
 
 # ─── B0: Snort anchor (computed, no training) ───────────────────────────────
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║ B0  Snort anchor (reference — recovers 0 of its own FN)        ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
-( cd "$PKG_DIR" && "$PYTHON_BIN" - <<'PY'
+if (( DRY_RUN )); then
+  echo "DRY-RUN: skip Snort anchor computation"
+else
+  ( cd "$PKG_DIR" && "$PYTHON_BIN" - <<'PY'
 import json
 from pathlib import Path
 a = json.loads(Path("../sip-dataset/new_general_split/attack/test.json").read_text())["dataset"]
@@ -108,6 +127,7 @@ print(f"  Snort-FN recovery R@1/5/10% = 0.0000 (by construction — these ARE Sn
 print(f"  Added benign FP over Snort = 0 (Snort baseline is the reference point)")
 PY
 ) || echo "[warn] Snort anchor computation failed (non-fatal)"
+fi
 
 # ─── Training runs + per-run offline R@FPR evaluation ───────────────────────
 declare -a RESULTS=()
@@ -129,7 +149,9 @@ for entry in "${RUNS[@]}"; do
   echo "╚══════════════════════════════════════════════════════════════╝"
 
   run_dir="$RUNS_DIR/$name"
-  mkdir -p "$PKG_DIR/$run_dir"
+  if (( ! DRY_RUN )); then
+    mkdir -p "$PKG_DIR/$run_dir"
+  fi
   start=$(date +%s)
 
   # ── Training (from PKG_DIR so ../sip-dataset and ./artifacts resolve) ──
@@ -137,11 +159,16 @@ for entry in "${RUNS[@]}"; do
   if [[ "$use_pt" == "1" ]]; then
     pt_args=(--pretrained "$PRETRAIN")
   fi
-  ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
-      --config "$CFG_DIR/$name.json" \
-      "${pt_args[@]}" \
-      --device mps) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
-  train_rc=${PIPESTATUS[0]}
+  if (( DRY_RUN )); then
+    echo "DRY-RUN: (cd $PKG_DIR && $PYTHON_BIN classifier_creator.py --config $CFG_DIR/$name.json ${pt_args[*]:-} --device mps)"
+    train_rc=0
+  else
+    ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
+        --config "$CFG_DIR/$name.json" \
+        "${pt_args[@]}" \
+        --device mps) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
+    train_rc=${PIPESTATUS[0]}
+  fi
 
   if [[ $train_rc -ne 0 ]]; then
     echo "[FAIL] training failed for $name (rc=$train_rc)"
@@ -151,14 +178,22 @@ for entry in "${RUNS[@]}"; do
   fi
 
   # ── Offline per-epoch R@FPR (from WS_ROOT so nids_ml imports) ──
-  ( cd "$WS_ROOT" && "$PYTHON_BIN" -m nids_ml.artifacts.processors.epoch_budget_campaign \
-      --run-dir "nids_ml/$run_dir" \
-      --budgets "$BUDGETS" ) 2>&1 | tee "$PKG_DIR/$run_dir/epoch_budget.log"
-  drv_rc=${PIPESTATUS[0]}
+  if (( DRY_RUN )); then
+    echo "DRY-RUN: (cd $WS_ROOT && $PYTHON_BIN -m nids_ml.artifacts.processors.epoch_budget_campaign --run-dir nids_ml/$run_dir --budgets $BUDGETS)"
+    drv_rc=0
+  else
+    ( cd "$WS_ROOT" && "$PYTHON_BIN" -m nids_ml.artifacts.processors.epoch_budget_campaign \
+        --run-dir "nids_ml/$run_dir" \
+        --budgets "$BUDGETS" ) 2>&1 | tee "$PKG_DIR/$run_dir/epoch_budget.log"
+    drv_rc=${PIPESTATUS[0]}
+  fi
 
   end=$(date +%s); mins=$(( (end-start)/60 ))
 
-  if [[ $drv_rc -ne 0 ]]; then
+  if (( DRY_RUN )); then
+    RESULTS+=("DRY-RUN  $name")
+    PASS=$((PASS+1))
+  elif [[ $drv_rc -ne 0 ]]; then
     echo "[WARN] driver failed for $name (rc=$drv_rc)"
     RESULTS+=("WARN  $name (train ok, driver rc=$drv_rc) [${mins}m]")
     FAIL=$((FAIL+1))
@@ -175,7 +210,11 @@ done
 camp_mins=$(( ($(date +%s)-CAMP_START)/60 ))
 echo ""
 echo "════════════════════════════════════════════════════════════════"
-echo " ARTICLE-1 RUN SET COMPLETE — $PASS ok, $FAIL failed, ${camp_mins}m"
+if (( DRY_RUN )); then
+  echo " ARTICLE-1 DRY-RUN COMPLETE — $PASS planned, ${camp_mins}m"
+else
+  echo " ARTICLE-1 RUN SET COMPLETE — $PASS ok, $FAIL failed, ${camp_mins}m"
+fi
 echo "════════════════════════════════════════════════════════════════"
 for r in "${RESULTS[@]}"; do echo "  $r"; done
 echo ""
