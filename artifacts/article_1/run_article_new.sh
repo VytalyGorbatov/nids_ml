@@ -3,7 +3,7 @@
 # "A Weakly Supervised Neural Risk-Scoring Method for Detecting Attacks Missed
 #  by Signature-Based NIDS"
 #
-# Runs the 5 training runs that back the headline + design-justification tables,
+# Runs the 7 training runs that back the headline + design-justification tables,
 # then computes per-epoch Snort-FN recovery (R@1/5/10%) for each via the offline
 # driver. Single set only — NO seed variation (author handles seeds separately).
 #
@@ -14,10 +14,13 @@
 #   B3  oracle_isattack       — supervised(is_attack),head_last_block, SSL init   [upper bound]
 #   M1  full_backbone_pu      — PU,                   full,            SSL init   [trainability contrast]
 #   A1  scratch_full_pu       — PU,                   full,            RANDOM init [SSL ablation, no --pretrained]
+#   A2  scratch_headlast_pu   — PU,                   head_last_block, RANDOM init [SSL ablation, no --pretrained]
+#   A3  method_headlast_pu_ssl_off — PU,              head_last_block, SSL init   [Stage-2 SSL ablation]
 #
-# Comparisons: B0→B2→M3→B3 (headline) | M3 vs M1 (trainability) | M1 vs A1 (SSL pretraining)
+# Comparisons: B0→B2→M3→B3 (headline) | M3 vs M1 (trainability) |
+#              M3 vs A2 (Stage-1 SSL) | M3 vs A3 (Stage-2 SSL)
 #
-# cuda stability: runs sequentially, one at a time, foreground.
+# mps stability: runs sequentially, one at a time, foreground.
 # Usage:  bash nids_ml/artifacts/article_1/run_article1.sh
 # ────────────────────────────────────────────────────────────────────────────
 set -uo pipefail
@@ -27,7 +30,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PKG_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"     # .../nids_ml
 WS_ROOT="$(cd "$PKG_DIR/.." && pwd)"           # .../NeuralNetworks
 
-PYTHON_BIN="/home/vhorbato/.pyvenv/bin/python3"  # full path to python binary (must have torch, sklearn, etc.)
+PYTHON_BIN="/Users/vhorbato/.venv/bin/python3"  # full path to python binary (must have torch, sklearn, etc.)
 PRETRAIN_CFG="artifacts/article_1/configs/new-set/pretrain_uonly_ssl.json"
 PRETRAIN_DIR="artifacts/article_1/pretrain_new"
 PRETRAIN=""
@@ -42,17 +45,19 @@ RUNS=(
   "oracle_isattack:1"
   "full_backbone_pu:1"
   "scratch_full_pu:0"
+  "scratch_headlast_pu:0"
+  "method_headlast_pu_ssl_off:1"
 )
 
 # ─── Stage 1: shared U-only contrastive pretraining ────────────────────────
-# echo "╔══════════════════════════════════════════════════════════════╗"
-# echo "║ Stage 1  Shared U-only SSL pretraining (30 epochs)             ║"
-# echo "╚══════════════════════════════════════════════════════════════╝"
-# mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║ Stage 1  Shared U-only SSL pretraining (30 epochs)             ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
 PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
 ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
     --config "$PRETRAIN_CFG" \
-    --device cuda ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
+    --device mps ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
 pretrain_rc=${PIPESTATUS[0]}
 
 if [[ $pretrain_rc -ne 0 ]]; then
@@ -88,8 +93,8 @@ echo "╚═══════════════════════�
 ( cd "$PKG_DIR" && "$PYTHON_BIN" - <<'PY'
 import json
 from pathlib import Path
-a = json.loads(Path("../sip-dataset/attack/test.json").read_text())["dataset"]
-b = json.loads(Path("../sip-dataset/benign/test.json").read_text())["dataset"]
+a = json.loads(Path("../sip-dataset/new_general_split/attack/test.json").read_text())["dataset"]
+b = json.loads(Path("../sip-dataset/new_general_split/benign/test.json").read_text())["dataset"]
 recs = a + b
 tp = sum(1 for r in recs if r["is_attack"]==1 and r["alerted"]==1)
 fn = sum(1 for r in recs if r["is_attack"]==1 and r["alerted"]==0)
@@ -135,7 +140,7 @@ for entry in "${RUNS[@]}"; do
   ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
       --config "$CFG_DIR/$name.json" \
       "${pt_args[@]}" \
-      --device cuda) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
+      --device mps) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
   train_rc=${PIPESTATUS[0]}
 
   if [[ $train_rc -ne 0 ]]; then
@@ -164,7 +169,7 @@ for entry in "${RUNS[@]}"; do
     RESULTS+=("OK    $name [${mins}m]")
     PASS=$((PASS+1))
   fi
-done"
+done
 
 # ─── Summary ────────────────────────────────────────────────────────────────
 camp_mins=$(( ($(date +%s)-CAMP_START)/60 ))
@@ -176,5 +181,5 @@ for r in "${RESULTS[@]}"; do echo "  $r"; done
 echo ""
 echo "Per-run R@1/5/10% tables:  $RUNS_DIR/*/epoch_budget_matrix.md"
 echo "Headline progression:      Snort(B0) → teacher_copy(B2) → method(M3) → oracle(B3)"
-echo "Ablations:                 M3 vs full_backbone(M1)  |  M1 vs scratch_full(A1)"
+echo "Ablations:                 M3 vs full_backbone(M1) | M3 vs scratch_headlast(A2) | M3 vs ssl_off(A3)"
 date

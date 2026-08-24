@@ -1,16 +1,16 @@
 {
   "artifacts": {
-    "out_dir": "./artifacts/article_1/runs/mutation-set/method_headlast_pu"
+    "out_dir": "./artifacts/article_1/runs/new-set/scratch_headlast_pu"
   },
   "attack_paths": {
-    "test": "../sip-dataset/mutation_holdout_split/attack/test.json",
-    "train": "../sip-dataset/mutation_holdout_split/attack/train.json",
-    "val": "../sip-dataset/mutation_holdout_split/attack/val.json"
+    "test": "../sip-dataset/new_general_split/attack/test.json",
+    "train": "../sip-dataset/new_general_split/attack/train.json",
+    "val": "../sip-dataset/new_general_split/attack/val.json"
   },
   "benign_paths": {
-    "test": "../sip-dataset/mutation_holdout_split/benign/test.json",
-    "train": "../sip-dataset/mutation_holdout_split/benign/train.json",
-    "val": "../sip-dataset/mutation_holdout_split/benign/val.json"
+    "test": "../sip-dataset/new_general_split/benign/test.json",
+    "train": "../sip-dataset/new_general_split/benign/train.json",
+    "val": "../sip-dataset/new_general_split/benign/val.json"
   },
   "data": {
     "buffer_field": "buffers",
@@ -34,22 +34,22 @@
     "batch_size": 256,
     "best_metric": "pr_auc",
     "clip_grad": 1.0,
+    "disable_early_stop": true,
+    "disable_plateau_sched": true,
     "lr": 0.0001,
     "max_epochs_pretrain": 0,
     "max_epochs_pu": 7,
-    "stage2_steps_per_epoch": 239,
     "num_workers": 0,
     "patience": 2,
     "pi_p": 0.12,
+    "save_epoch_checkpoints": true,
+    "stage2_objective": "pu",
+    "stage2_steps_per_epoch": 239,
+    "stage2_trainable": "head_last_block",
     "temp": 0.2,
     "w_alert": 0.1,
     "w_pu": 1.0,
     "w_ssl": 1.5,
-    "weight_decay": 0.0001,
-    "stage2_objective": "pu",
-    "stage2_trainable": "head_last_block",
-    "save_epoch_checkpoints": true,
-    "disable_early_stop": true,
-    "disable_plateau_sched": true
+    "weight_decay": 0.0001
   }
 }

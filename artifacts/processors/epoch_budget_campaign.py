@@ -155,6 +155,7 @@ def _evaluate_epoch(
         rows.append({
             "epoch": epoch,
             "budget": b,
+            "threshold": t,
             "R": s["snort_fn_recovery"],
             "snort_fn_recovered": s["snort_fn_recovered"],
             "snort_fn_total": s["snort_fn_total"],
@@ -244,12 +245,12 @@ def _render_markdown(
         f"{selected['epoch']} (validation AP={selected['val_average_precision']:.4f}).",
         "The following test values use that single validation-selected checkpoint.",
         "",
-        "| nominal FPR budget | Snort-FN recovery | added benign FP | observed test FPR |",
-        "|---|---:|---:|---:|",
+        "| nominal FPR budget | threshold | Snort-FN recovery | added benign FP | observed test FPR |",
+        "|---|---:|---:|---:|---:|",
     ]
     for row in selected_rows:
         lines.append(
-            f"| {row['budget']:.0%} | {row['R']:.4f} | "
+            f"| {row['budget']:.0%} | {row['threshold']:.4f} | {row['R']:.4f} | "
             f"{row['benign_fp_added']} | {row['benign_fpr']:.4%} |"
         )
     lines.extend([
