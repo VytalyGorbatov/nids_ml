@@ -1,0 +1,11 @@
+Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6] | budgets: [0.01, 0.05, 0.1]
+[epoch 0] test_average_precision=0.9138 | R@1%=0.6230(fp+47), R@5%=0.7868(fp+345), R@10%=0.9207(fp+1380)
+[epoch 1] test_average_precision=0.9141 | R@1%=0.6277(fp+93), R@5%=0.7857(fp+405), R@10%=0.9425(fp+1471)
+[epoch 2] test_average_precision=0.9291 | R@1%=0.6477(fp+44), R@5%=0.8884(fp+834), R@10%=0.9765(fp+1999)
+[epoch 3] test_average_precision=0.9248 | R@1%=0.5531(fp+19), R@5%=0.8344(fp+511), R@10%=0.9736(fp+2036)
+[epoch 4] test_average_precision=0.9249 | R@1%=0.5948(fp+37), R@5%=0.8784(fp+820), R@10%=0.9783(fp+2187)
+[epoch 5] test_average_precision=0.9169 | R@1%=0.6653(fp+128), R@5%=0.8573(fp+783), R@10%=0.9701(fp+2152)
+[epoch 6] test_average_precision=0.9150 | R@1%=0.6747(fp+144), R@5%=0.8397(fp+757), R@10%=0.9560(fp+1876)
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/method_headlast_pu/epoch_budget_matrix.json
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/method_headlast_pu/epoch_budget_matrix.md
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/method_headlast_pu/validation_selected_results.json

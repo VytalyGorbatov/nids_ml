@@ -1,0 +1,43 @@
+2026-08-24 18:30:00,203 [INFO] Global seed set to 137744799
+2026-08-24 18:30:00,204 [INFO] Model type: tcn_2way | Device: cuda
+2026-08-24 18:30:00,934 [INFO] Train P (alerted=1): 1967, Train U (alerted=0): 70147
+2026-08-24 18:30:00,934 [INFO] Val: 16458, Test: 17253
+2026-08-24 18:30:00,935 [INFO] Building model type 'tcn_2way'
+2026-08-24 18:30:00,945 [INFO] Model parameters: 817,986
+2026-08-24 18:30:01,100 [INFO] Loaded pretrained checkpoint from artifacts/article_1/pretrain_new/pretrain_epoch19.pt
+2026-08-24 18:30:05,552 [INFO] Skipping Stage 1; loaded pretrained weights.
+2026-08-24 18:30:06,041 [INFO] Supervised train (all): 72114 records (alerted=1: 1967, is_attack=1: 8756)
+2026-08-24 18:30:06,041 [INFO] == Stage 2: supervised BCE training (8 epochs, target=is_attack, batching=natural) ==
+2026-08-24 18:30:06,042 [INFO] Stage-2 trainability: mode=head_last_block | 1 group(s) lrs=['1.00e-04'] | trainable=303,874 params | frozen=514,112 params
+2026-08-24 18:30:06,613 [INFO] Positive exposure [supervised/is_attack]: ~1969 positive samples/epoch = 1.00 pass(es) over |P|=1967
+2026-08-24 18:31:03,899 [INFO] [supervised epoch 0] steps=282 loss=0.1795 pr_auc=0.9342 bestF1=0.8315 fn_recall=0.7808 thr=0.286 lr=1.00e-04
+2026-08-24 18:32:00,863 [INFO] [supervised epoch 1] steps=282 loss=0.0641 pr_auc=0.9762 bestF1=0.9167 fn_recall=0.8978 thr=0.339 lr=1.00e-04
+2026-08-24 18:32:57,825 [INFO] [supervised epoch 2] steps=282 loss=0.0406 pr_auc=0.9921 bestF1=0.9516 fn_recall=0.9388 thr=0.459 lr=1.00e-04
+2026-08-24 18:33:54,727 [INFO] [supervised epoch 3] steps=282 loss=0.0243 pr_auc=0.9977 bestF1=0.9749 fn_recall=0.9623 thr=0.310 lr=1.00e-04
+2026-08-24 18:34:51,623 [INFO] [supervised epoch 4] steps=282 loss=0.0164 pr_auc=0.9990 bestF1=0.9858 fn_recall=0.9785 thr=0.410 lr=1.00e-04
+2026-08-24 18:35:48,440 [INFO] [supervised epoch 5] steps=282 loss=0.0123 pr_auc=0.9993 bestF1=0.9892 fn_recall=0.9845 thr=0.104 lr=1.00e-04
+2026-08-24 18:36:45,226 [INFO] [supervised epoch 6] steps=282 loss=0.0100 pr_auc=0.9996 bestF1=0.9918 fn_recall=0.9845 thr=0.285 lr=1.00e-04
+2026-08-24 18:37:42,258 [INFO] [supervised epoch 7] steps=282 loss=0.0081 pr_auc=0.9997 bestF1=0.9921 fn_recall=0.9913 thr=0.385 lr=1.00e-04
+2026-08-24 18:37:42,268 [INFO] Best checkpoint: pr_auc=0.9997
+2026-08-24 18:37:47,817 [INFO] PriorCorrection: pi_train=0.1200 pi_target=0.1184 shift=-0.0150
+2026-08-24 18:37:47,817 [INFO]   prior_correction log-loss: 0.00545
+2026-08-24 18:37:47,823 [INFO] Platt scaling: a=1.4099 b=0.2857
+2026-08-24 18:37:47,823 [INFO]   platt log-loss: 0.00500
+2026-08-24 18:37:48,021 [INFO] Isotonic calibration: 9 knots, range [0.0000, 1.0000]
+2026-08-24 18:37:48,022 [INFO]   isotonic log-loss: 0.01106
+2026-08-24 18:37:48,022 [INFO] Selected calibrator: platt (log-loss=0.00500)
+2026-08-24 18:37:53,773 [INFO] Test Metrics (calibrated, threshold=0.5):
+2026-08-24 18:37:53,773 [INFO]   threshold: 0.5000
+2026-08-24 18:37:53,773 [INFO]   f1: 0.8885
+2026-08-24 18:37:53,773 [INFO]   precision: 0.8620
+2026-08-24 18:37:53,773 [INFO]   recall: 0.9166
+2026-08-24 18:37:53,773 [INFO]   average_precision: 0.9526
+2026-08-24 18:37:53,773 [INFO]   pr_auc: 0.9526
+2026-08-24 18:37:53,773 [INFO]   selection_policy: validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5
+2026-08-24 18:37:53,773 [INFO]   oracle_diagnostics: {'test_best_f1': 0.8934099674224854, 'test_best_threshold': 0.8270752429962158, 'test_precision_at_best_f1': 0.8809419870376587, 'test_recall_at_best_f1': 0.9062359929084778}
+2026-08-24 18:37:53,773 [INFO]   calibrator: platt
+2026-08-24 18:37:53,773 [INFO]   val_threshold_raw: 0.3846
+2026-08-24 18:38:01,365 [INFO] Saved 16458 val samples to artifacts/article_1/runs/new-set/oracle_isattack/val_samples.json
+2026-08-24 18:38:01,365 [INFO] Saved 16458 val samples to artifacts/article_1/runs/new-set/oracle_isattack/val_samples.json
+2026-08-24 18:38:09,320 [INFO] Saved 17253 test samples to artifacts/article_1/runs/new-set/oracle_isattack/test_samples.json
+2026-08-24 18:38:09,320 [INFO] Saved 17253 test samples to artifacts/article_1/runs/new-set/oracle_isattack/test_samples.json

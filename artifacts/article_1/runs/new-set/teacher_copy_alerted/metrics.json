@@ -1,0 +1,45 @@
+{
+  "best_val_metrics": {
+    "average_precision": 0.8994403737892728,
+    "best_f1": 0.8023450970649719,
+    "best_threshold": 0.011290442198514938,
+    "pr_auc": 0.8994403737892728,
+    "precision_at_best": 0.8799754977226257,
+    "recall_at_best": 0.7373011708259583,
+    "snort_fn_count": 1487,
+    "snort_fn_f1": 0.7355371900826446,
+    "snort_fn_precision": 0.8331914893617022,
+    "snort_fn_recall": 0.6583725622057834,
+    "snort_fn_recovered": 979
+  },
+  "pretrain_val": {
+    "average_precision": 0.07928456840321321,
+    "best_f1": 0.2117902785539627,
+    "best_threshold": 0.30321142077445984,
+    "pr_auc": 0.07928456840321321,
+    "precision_at_best": 0.11843704432249069,
+    "recall_at_best": 1.0,
+    "snort_fn_count": 1487,
+    "snort_fn_f1": 0.1701275670728219,
+    "snort_fn_precision": 0.09297236463673877,
+    "snort_fn_recall": 1.0,
+    "snort_fn_recovered": 1487
+  },
+  "test_metrics": {
+    "average_precision": 0.9012188627825312,
+    "calibrator": "isotonic",
+    "f1": 0.7840077877044678,
+    "oracle_diagnostics": {
+      "test_best_f1": 0.7956091165542603,
+      "test_best_threshold": 0.0075516896322369576,
+      "test_precision_at_best_f1": 0.7790197730064392,
+      "test_recall_at_best_f1": 0.8129205703735352
+    },
+    "pr_auc": 0.9012188627825312,
+    "precision": 0.858515739440918,
+    "recall": 0.72139972448349,
+    "selection_policy": "validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5",
+    "threshold": 0.5,
+    "val_threshold_raw": 0.011290442198514938
+  }
+}

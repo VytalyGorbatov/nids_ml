@@ -1,0 +1,11 @@
+Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6] | budgets: [0.01, 0.05, 0.1]
+[epoch 0] test_average_precision=0.9161 | R@1%=0.6430(fp+72), R@5%=0.9378(fp+1556), R@10%=0.9736(fp+2393)
+[epoch 1] test_average_precision=0.9426 | R@1%=0.8033(fp+390), R@5%=0.9360(fp+887), R@10%=0.9753(fp+1811)
+[epoch 2] test_average_precision=0.9383 | R@1%=0.7722(fp+262), R@5%=0.9366(fp+896), R@10%=0.9794(fp+1755)
+[epoch 3] test_average_precision=0.9366 | R@1%=0.8291(fp+452), R@5%=0.9219(fp+867), R@10%=0.9677(fp+1802)
+[epoch 4] test_average_precision=0.9398 | R@1%=0.8591(fp+398), R@5%=0.9378(fp+809), R@10%=0.9654(fp+1529)
+[epoch 5] test_average_precision=0.9131 | R@1%=0.7311(fp+338), R@5%=0.8967(fp+1008), R@10%=0.9472(fp+1571)
+[epoch 6] test_average_precision=0.9008 | R@1%=0.7957(fp+396), R@5%=0.9172(fp+853), R@10%=0.9618(fp+1608)
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/scratch_full_pu/epoch_budget_matrix.json
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/scratch_full_pu/epoch_budget_matrix.md
+Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/scratch_full_pu/validation_selected_results.json

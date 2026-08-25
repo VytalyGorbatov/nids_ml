@@ -40,7 +40,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PKG_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"     # .../nids_ml
 WS_ROOT="$(cd "$PKG_DIR/.." && pwd)"           # .../NeuralNetworks
 
-PYTHON_BIN="/Users/vhorbato/.venv/bin/python3"  # full path to python binary (must have torch, sklearn, etc.)
+PYTHON_BIN="/home/vhorbato/.pyvenv/bin/python3"  # full path to python binary (must have torch, sklearn, etc.)
+DEVICE="cuda"  # or "cpu" or "cuda" (if available)
 PRETRAIN_CFG="artifacts/article_1/configs/new-set/pretrain_uonly_ssl.json"
 PRETRAIN_DIR="artifacts/article_1/pretrain_new"
 PRETRAIN=""
@@ -64,7 +65,7 @@ echo "╔═══════════════════════�
 echo "║ Stage 1  Shared U-only SSL pretraining (30 epochs)             ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 if (( DRY_RUN )); then
-  echo "DRY-RUN: (cd $PKG_DIR && $PYTHON_BIN classifier_creator.py --config $PRETRAIN_CFG --device mps)"
+  echo "DRY-RUN: (cd $PKG_DIR && $PYTHON_BIN classifier_creator.py --config $PRETRAIN_CFG --device $DEVICE)"
   PRETRAIN="$PRETRAIN_DIR/pretrain_epoch<N>.pt"
   echo "DRY-RUN: later runs will use the latest checkpoint under $PRETRAIN_DIR"
 else
@@ -72,7 +73,7 @@ else
   PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
   ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
       --config "$PRETRAIN_CFG" \
-      --device mps ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
+      --device $DEVICE ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
   pretrain_rc=${PIPESTATUS[0]}
 
   if [[ $pretrain_rc -ne 0 ]]; then
@@ -160,13 +161,13 @@ for entry in "${RUNS[@]}"; do
     pt_args=(--pretrained "$PRETRAIN")
   fi
   if (( DRY_RUN )); then
-    echo "DRY-RUN: (cd $PKG_DIR && $PYTHON_BIN classifier_creator.py --config $CFG_DIR/$name.json ${pt_args[*]:-} --device mps)"
+    echo "DRY-RUN: (cd $PKG_DIR && $PYTHON_BIN classifier_creator.py --config $CFG_DIR/$name.json ${pt_args[*]:-} --device $DEVICE)"
     train_rc=0
   else
     ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
         --config "$CFG_DIR/$name.json" \
         "${pt_args[@]}" \
-        --device mps) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
+        --device $DEVICE ) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
     train_rc=${PIPESTATUS[0]}
   fi
 

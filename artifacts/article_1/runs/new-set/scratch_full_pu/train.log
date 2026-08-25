@@ -1,0 +1,43 @@
+2026-08-24 19:40:04,625 [INFO] Global seed set to 137744799
+2026-08-24 19:40:04,625 [INFO] Model type: tcn_2way | Device: cuda
+2026-08-24 19:40:04,626 [WARNING] No Stage-1 pretraining and no --pretrained checkpoint: the backbone starts from random weights.
+2026-08-24 19:40:05,358 [INFO] Train P (alerted=1): 1967, Train U (alerted=0): 70147
+2026-08-24 19:40:05,358 [INFO] Val: 16458, Test: 17253
+2026-08-24 19:40:05,359 [INFO] Building model type 'tcn_2way'
+2026-08-24 19:40:05,367 [INFO] Model parameters: 817,986
+2026-08-24 19:40:05,948 [INFO] Pretrain train (all): 72114 records (alerted=1: 1967, is_attack=1: 8756)
+2026-08-24 19:40:05,948 [INFO] == Stage 1: contrastive pretraining (0 epochs) ==
+2026-08-24 19:40:06,526 [INFO] == Stage 2: nnPU training (7 epochs, π=0.120) ==
+2026-08-24 19:40:06,527 [INFO] PU prior: pool pi=0.1200 -> unlabeled pi=0.0953 (|P|=1967, |U|=70147); nnPU requires the prior inside U
+2026-08-24 19:40:06,527 [INFO] Stage-2 trainability: mode=full | 1 group(s) lrs=['1.00e-04'] | trainable=817,986 params | frozen=0 params
+2026-08-24 19:40:06,527 [INFO] Positive exposure [nnPU]: ~61184 positive samples/epoch = 31.11 pass(es) over |P|=1967
+2026-08-24 19:48:00,001 [INFO] [nnPU epoch 0] steps=239 loss=0.9563 pr_auc=0.9317 bestF1=0.8387 fn_recall=0.8904 thr=0.109 lr=1.00e-04 defit=24%
+2026-08-24 19:55:51,084 [INFO] [nnPU epoch 1] steps=239 loss=0.6259 pr_auc=0.9507 bestF1=0.8756 fn_recall=0.7492 thr=0.426 lr=1.00e-04 defit=49%
+2026-08-24 20:03:42,235 [INFO] [nnPU epoch 2] steps=239 loss=0.5513 pr_auc=0.9282 bestF1=0.8303 fn_recall=0.7640 thr=0.339 lr=1.00e-04 defit=46%
+2026-08-24 20:11:33,446 [INFO] [nnPU epoch 3] steps=239 loss=0.5010 pr_auc=0.9091 bestF1=0.8293 fn_recall=0.6839 thr=0.253 lr=1.00e-04 defit=46%
+2026-08-24 20:19:24,646 [INFO] [nnPU epoch 4] steps=239 loss=0.4678 pr_auc=0.9085 bestF1=0.8303 fn_recall=0.6718 thr=0.316 lr=1.00e-04 defit=46%
+2026-08-24 20:27:15,885 [INFO] [nnPU epoch 5] steps=239 loss=0.4492 pr_auc=0.8766 bestF1=0.7802 fn_recall=0.6073 thr=0.226 lr=1.00e-04 defit=46%
+2026-08-24 20:35:07,067 [INFO] [nnPU epoch 6] steps=239 loss=0.4369 pr_auc=0.8832 bestF1=0.7929 fn_recall=0.6651 thr=0.312 lr=1.00e-04 defit=45%
+2026-08-24 20:35:07,067 [INFO] Best checkpoint: pr_auc=0.9507
+2026-08-24 20:35:12,655 [INFO] PriorCorrection: pi_train=0.0953 pi_target=0.1184 shift=0.2428
+2026-08-24 20:35:12,655 [INFO]   prior_correction log-loss: 0.12826
+2026-08-24 20:35:12,663 [INFO] Platt scaling: a=2.7489 b=1.2583
+2026-08-24 20:35:12,663 [INFO]   platt log-loss: 0.07544
+2026-08-24 20:35:12,865 [INFO] Isotonic calibration: 28 knots, range [0.0000, 1.0000]
+2026-08-24 20:35:12,866 [INFO]   isotonic log-loss: 0.07167
+2026-08-24 20:35:12,866 [INFO] Selected calibrator: isotonic (log-loss=0.07167)
+2026-08-24 20:35:18,732 [INFO] Test Metrics (calibrated, threshold=0.5):
+2026-08-24 20:35:18,733 [INFO]   threshold: 0.5000
+2026-08-24 20:35:18,733 [INFO]   f1: 0.8419
+2026-08-24 20:35:18,733 [INFO]   precision: 0.8782
+2026-08-24 20:35:18,733 [INFO]   recall: 0.8084
+2026-08-24 20:35:18,733 [INFO]   average_precision: 0.9426
+2026-08-24 20:35:18,733 [INFO]   pr_auc: 0.9426
+2026-08-24 20:35:18,733 [INFO]   selection_policy: validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5
+2026-08-24 20:35:18,733 [INFO]   oracle_diagnostics: {'test_best_f1': 0.8444855213165283, 'test_best_threshold': 0.42583590745925903, 'test_precision_at_best_f1': 0.8693586587905884, 'test_recall_at_best_f1': 0.8209959864616394}
+2026-08-24 20:35:18,733 [INFO]   calibrator: isotonic
+2026-08-24 20:35:18,733 [INFO]   val_threshold_raw: 0.4258
+2026-08-24 20:35:26,374 [INFO] Saved 16458 val samples to artifacts/article_1/runs/new-set/scratch_full_pu/val_samples.json
+2026-08-24 20:35:26,374 [INFO] Saved 16458 val samples to artifacts/article_1/runs/new-set/scratch_full_pu/val_samples.json
+2026-08-24 20:35:34,412 [INFO] Saved 17253 test samples to artifacts/article_1/runs/new-set/scratch_full_pu/test_samples.json
+2026-08-24 20:35:34,412 [INFO] Saved 17253 test samples to artifacts/article_1/runs/new-set/scratch_full_pu/test_samples.json

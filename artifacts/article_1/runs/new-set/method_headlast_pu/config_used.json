@@ -1,0 +1,70 @@
+{
+  "artifacts": {
+    "out_dir": "./artifacts/article_1/runs/new-set/method_headlast_pu"
+  },
+  "attack_paths": {
+    "test": "../sip-dataset/new_general_split/attack/test.json",
+    "train": "../sip-dataset/new_general_split/attack/train.json",
+    "val": "../sip-dataset/new_general_split/attack/val.json"
+  },
+  "benign_paths": {
+    "test": "../sip-dataset/new_general_split/benign/test.json",
+    "train": "../sip-dataset/new_general_split/benign/train.json",
+    "val": "../sip-dataset/new_general_split/benign/val.json"
+  },
+  "data": {
+    "buffer_field": "buffers",
+    "fallback_header_len": 512,
+    "fixed_len": 1024,
+    "sep_byte": 30
+  },
+  "model": {
+    "channels": 96,
+    "dilations": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "dropout": 0.1,
+    "embed_dim": 32,
+    "fusion_dim": 256,
+    "kernel": 5,
+    "prefix_lengths": [
+      64,
+      128,
+      256,
+      512
+    ],
+    "proj_dim": 192,
+    "type": "tcn_2way"
+  },
+  "seed": 137744799,
+  "stage1_provenance": {
+    "max_epochs_pretrain": 0,
+    "pretrained_path": "artifacts/article_1/pretrain_new/pretrain_epoch19.pt",
+    "random_init": false
+  },
+  "training": {
+    "batch_size": 256,
+    "best_metric": "pr_auc",
+    "clip_grad": 1.0,
+    "disable_early_stop": true,
+    "disable_plateau_sched": true,
+    "lr": 0.0001,
+    "max_epochs_pretrain": 0,
+    "max_epochs_pu": 7,
+    "num_workers": 0,
+    "patience": 2,
+    "pi_p": 0.12,
+    "save_epoch_checkpoints": true,
+    "stage2_objective": "pu",
+    "stage2_steps_per_epoch": 239,
+    "stage2_trainable": "head_last_block",
+    "temp": 0.2,
+    "w_alert": 0.1,
+    "w_pu": 1.0,
+    "w_ssl": 1.5,
+    "weight_decay": 0.0001
+  }
+}

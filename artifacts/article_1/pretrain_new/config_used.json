@@ -1,6 +1,6 @@
 {
   "artifacts": {
-    "out_dir": "./artifacts/article_1/pretrain"
+    "out_dir": "./artifacts/article_1/pretrain_new"
   },
   "attack_paths": {
     "test": "../sip-dataset/new_general_split/attack/test.json",
@@ -40,6 +40,11 @@
     "type": "tcn_2way"
   },
   "seed": 137744799,
+  "stage1_provenance": {
+    "max_epochs_pretrain": 20,
+    "pretrained_path": null,
+    "random_init": false
+  },
   "training": {
     "batch_size": 256,
     "clip_grad": 1.0,
@@ -48,7 +53,7 @@
     "num_workers": 0,
     "pretrain_only": true,
     "temp": 0.2,
-    "w_alert": 0.0,
+    "w_alert": 0.1,
     "w_ssl": 1.5,
     "weight_decay": 0.0001
   }

@@ -1,0 +1,40 @@
+{
+  "diagnostic_only": true,
+  "warning": "Thresholds were selected from test benign labels; do not report as operational results.",
+  "score_key": "raw_score",
+  "operating_points": [
+    {
+      "budget_strictly_below": 0.01,
+      "threshold": 0.959,
+      "maximum_allowed_benign_fp": 139,
+      "benign_total": 13935,
+      "benign_fp": 139,
+      "benign_fpr": 0.009974883387154647,
+      "snort_fn_total": 683,
+      "snort_fn_recovered": 616,
+      "snort_fn_recovery": 0.9019033674963397
+    },
+    {
+      "budget_strictly_below": 0.05,
+      "threshold": 0.0068,
+      "maximum_allowed_benign_fp": 696,
+      "benign_total": 13935,
+      "benign_fp": 695,
+      "benign_fpr": 0.049874416935773234,
+      "snort_fn_total": 683,
+      "snort_fn_recovered": 682,
+      "snort_fn_recovery": 0.9985358711566618
+    },
+    {
+      "budget_strictly_below": 0.1,
+      "threshold": 0.001,
+      "maximum_allowed_benign_fp": 1393,
+      "benign_total": 13935,
+      "benign_fp": 1360,
+      "benign_fpr": 0.09759598134194475,
+      "snort_fn_total": 683,
+      "snort_fn_recovered": 683,
+      "snort_fn_recovery": 1.0
+    }
+  ]
+}

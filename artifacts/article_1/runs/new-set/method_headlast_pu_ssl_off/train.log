@@ -1,0 +1,42 @@
+2026-08-24 20:38:37,129 [INFO] Global seed set to 137744799
+2026-08-24 20:38:37,129 [INFO] Model type: tcn_2way | Device: cuda
+2026-08-24 20:38:37,876 [INFO] Train P (alerted=1): 1967, Train U (alerted=0): 70147
+2026-08-24 20:38:37,876 [INFO] Val: 16458, Test: 17253
+2026-08-24 20:38:37,877 [INFO] Building model type 'tcn_2way'
+2026-08-24 20:38:37,886 [INFO] Model parameters: 817,986
+2026-08-24 20:38:38,030 [INFO] Loaded pretrained checkpoint from artifacts/article_1/pretrain_new/pretrain_epoch19.pt
+2026-08-24 20:38:42,500 [INFO] Skipping Stage 1; loaded pretrained weights.
+2026-08-24 20:38:42,500 [INFO] == Stage 2: nnPU training (7 epochs, π=0.120) ==
+2026-08-24 20:38:42,500 [INFO] PU prior: pool pi=0.1200 -> unlabeled pi=0.0953 (|P|=1967, |U|=70147); nnPU requires the prior inside U
+2026-08-24 20:38:42,501 [INFO] Stage-2 trainability: mode=head_last_block | 1 group(s) lrs=['1.00e-04'] | trainable=303,874 params | frozen=514,112 params
+2026-08-24 20:38:43,081 [INFO] Positive exposure [nnPU]: ~61184 positive samples/epoch = 31.11 pass(es) over |P|=1967
+2026-08-24 20:41:30,785 [INFO] [nnPU epoch 0] steps=239 loss=0.2033 pr_auc=0.8730 bestF1=0.7447 fn_recall=0.6913 thr=0.316 lr=1.00e-04 defit=18%
+2026-08-24 20:44:18,274 [INFO] [nnPU epoch 1] steps=239 loss=0.0654 pr_auc=0.8676 bestF1=0.7514 fn_recall=0.7431 thr=0.376 lr=1.00e-04 defit=49%
+2026-08-24 20:47:05,667 [INFO] [nnPU epoch 2] steps=239 loss=0.0558 pr_auc=0.8996 bestF1=0.7865 fn_recall=0.6880 thr=0.350 lr=1.00e-04 defit=51%
+2026-08-24 20:49:53,033 [INFO] [nnPU epoch 3] steps=239 loss=0.0475 pr_auc=0.8501 bestF1=0.7586 fn_recall=0.8319 thr=0.251 lr=1.00e-04 defit=50%
+2026-08-24 20:52:40,320 [INFO] [nnPU epoch 4] steps=239 loss=0.0475 pr_auc=0.8812 bestF1=0.7801 fn_recall=0.7391 thr=0.384 lr=1.00e-04 defit=52%
+2026-08-24 20:55:27,593 [INFO] [nnPU epoch 5] steps=239 loss=0.0454 pr_auc=0.8948 bestF1=0.7944 fn_recall=0.7115 thr=0.399 lr=1.00e-04 defit=53%
+2026-08-24 20:58:15,048 [INFO] [nnPU epoch 6] steps=239 loss=0.0420 pr_auc=0.8938 bestF1=0.7854 fn_recall=0.7095 thr=0.396 lr=1.00e-04 defit=52%
+2026-08-24 20:58:15,048 [INFO] Best checkpoint: pr_auc=0.8996
+2026-08-24 20:58:20,746 [INFO] PriorCorrection: pi_train=0.0953 pi_target=0.1184 shift=0.2428
+2026-08-24 20:58:20,746 [INFO]   prior_correction log-loss: 0.12537
+2026-08-24 20:58:20,752 [INFO] Platt scaling: a=1.7546 b=1.3313
+2026-08-24 20:58:20,752 [INFO]   platt log-loss: 0.10660
+2026-08-24 20:58:20,941 [INFO] Isotonic calibration: 34 knots, range [0.0000, 1.0000]
+2026-08-24 20:58:20,942 [INFO]   isotonic log-loss: 0.10289
+2026-08-24 20:58:20,942 [INFO] Selected calibrator: isotonic (log-loss=0.10289)
+2026-08-24 20:58:26,909 [INFO] Test Metrics (calibrated, threshold=0.5):
+2026-08-24 20:58:26,909 [INFO]   threshold: 0.5000
+2026-08-24 20:58:26,909 [INFO]   f1: 0.8293
+2026-08-24 20:58:26,909 [INFO]   precision: 0.9225
+2026-08-24 20:58:26,909 [INFO]   recall: 0.7533
+2026-08-24 20:58:26,909 [INFO]   average_precision: 0.9263
+2026-08-24 20:58:26,909 [INFO]   pr_auc: 0.9263
+2026-08-24 20:58:26,909 [INFO]   selection_policy: validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5
+2026-08-24 20:58:26,909 [INFO]   oracle_diagnostics: {'test_best_f1': 0.8301329612731934, 'test_best_threshold': 0.3686530590057373, 'test_precision_at_best_f1': 0.9198036193847656, 'test_recall_at_best_f1': 0.7563930153846741}
+2026-08-24 20:58:26,909 [INFO]   calibrator: isotonic
+2026-08-24 20:58:26,909 [INFO]   val_threshold_raw: 0.3501
+2026-08-24 20:58:34,426 [INFO] Saved 16458 val samples to artifacts/article_1/runs/new-set/method_headlast_pu_ssl_off/val_samples.json
+2026-08-24 20:58:34,426 [INFO] Saved 16458 val samples to artifacts/article_1/runs/new-set/method_headlast_pu_ssl_off/val_samples.json
+2026-08-24 20:58:42,366 [INFO] Saved 17253 test samples to artifacts/article_1/runs/new-set/method_headlast_pu_ssl_off/test_samples.json
+2026-08-24 20:58:42,366 [INFO] Saved 17253 test samples to artifacts/article_1/runs/new-set/method_headlast_pu_ssl_off/test_samples.json

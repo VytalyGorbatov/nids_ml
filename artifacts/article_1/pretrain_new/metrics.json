@@ -1,17 +1,17 @@
 {
   "best_val_metrics": {},
   "pretrain_val": {
-    "average_precision": 0.08046561230874373,
-    "best_f1": 0.2118542641401291,
-    "best_threshold": 0.17639222741127014,
-    "pr_auc": 0.08046561230874373,
-    "precision_at_best": 0.11848427355289459,
-    "recall_at_best": 0.9994869232177734,
+    "average_precision": 0.07928456840321321,
+    "best_f1": 0.2117902785539627,
+    "best_threshold": 0.30321142077445984,
+    "pr_auc": 0.07928456840321321,
+    "precision_at_best": 0.11843704432249069,
+    "recall_at_best": 1.0,
     "snort_fn_count": 1487,
-    "snort_fn_f1": 0.17015916638039622,
-    "snort_fn_precision": 0.0929970586394643,
-    "snort_fn_recall": 0.9993275050437121,
-    "snort_fn_recovered": 1486
+    "snort_fn_f1": 0.1701275670728219,
+    "snort_fn_precision": 0.09297236463673877,
+    "snort_fn_recall": 1.0,
+    "snort_fn_recovered": 1487
   },
   "test_metrics": {}
 }
