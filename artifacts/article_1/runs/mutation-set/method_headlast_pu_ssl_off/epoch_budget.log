@@ -1,11 +1,11 @@
 Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6] | budgets: [0.01, 0.05, 0.1]
-[epoch 0] test_average_precision=0.5668 | R@1%=0.5871(fp+461), R@5%=0.8785(fp+1288), R@10%=0.9649(fp+1937)
-[epoch 1] test_average_precision=0.4889 | R@1%=0.4129(fp+455), R@5%=0.8741(fp+1270), R@10%=0.9678(fp+1909)
-[epoch 2] test_average_precision=0.5474 | R@1%=0.6925(fp+509), R@5%=0.8902(fp+1209), R@10%=0.9488(fp+1819)
-[epoch 3] test_average_precision=0.5229 | R@1%=0.5520(fp+488), R@5%=0.8799(fp+1109), R@10%=0.9546(fp+1617)
-[epoch 4] test_average_precision=0.5136 | R@1%=0.4876(fp+442), R@5%=0.8902(fp+1105), R@10%=0.9502(fp+1615)
-[epoch 5] test_average_precision=0.5582 | R@1%=0.5578(fp+447), R@5%=0.8682(fp+1076), R@10%=0.9400(fp+1677)
-[epoch 6] test_average_precision=0.5507 | R@1%=0.5944(fp+436), R@5%=0.8346(fp+1071), R@10%=0.9034(fp+1709)
+[epoch 0] test_average_precision=0.8260 | R@1%=0.6589(fp+351), R@5%=0.8755(fp+1130), R@10%=0.9546(fp+2078)
+[epoch 1] test_average_precision=0.5684 | R@1%=0.6398(fp+547), R@5%=0.8580(fp+1207), R@10%=0.9517(fp+1856)
+[epoch 2] test_average_precision=0.6521 | R@1%=0.7394(fp+664), R@5%=0.8682(fp+1191), R@10%=0.9590(fp+1758)
+[epoch 3] test_average_precision=0.5640 | R@1%=0.6750(fp+627), R@5%=0.8755(fp+1293), R@10%=0.9634(fp+1940)
+[epoch 4] test_average_precision=0.5821 | R@1%=0.4934(fp+514), R@5%=0.8551(fp+1197), R@10%=0.9341(fp+1858)
+[epoch 5] test_average_precision=0.7234 | R@1%=0.5549(fp+435), R@5%=0.8199(fp+1245), R@10%=0.9122(fp+2146)
+[epoch 6] test_average_precision=0.6722 | R@1%=0.5666(fp+464), R@5%=0.8009(fp+1161), R@10%=0.8887(fp+1956)
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/mutation-set/method_headlast_pu_ssl_off/epoch_budget_matrix.json
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/mutation-set/method_headlast_pu_ssl_off/epoch_budget_matrix.md
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/mutation-set/method_headlast_pu_ssl_off/validation_selected_results.json

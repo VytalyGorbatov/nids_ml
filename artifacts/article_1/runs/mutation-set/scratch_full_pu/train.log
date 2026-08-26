@@ -1,43 +1,43 @@
-2026-08-25 00:21:12,064 [INFO] Global seed set to 137744799
-2026-08-25 00:21:12,064 [INFO] Model type: tcn_2way | Device: cuda
-2026-08-25 00:21:12,064 [WARNING] No Stage-1 pretraining and no --pretrained checkpoint: the backbone starts from random weights.
-2026-08-25 00:21:12,785 [INFO] Train P (alerted=1): 1590, Train U (alerted=0): 72318
-2026-08-25 00:21:12,785 [INFO] Val: 16621, Test: 15296
-2026-08-25 00:21:12,785 [INFO] Building model type 'tcn_2way'
-2026-08-25 00:21:12,793 [INFO] Model parameters: 817,986
-2026-08-25 00:21:13,377 [INFO] Pretrain train (all): 73908 records (alerted=1: 1590, is_attack=1: 10200)
-2026-08-25 00:21:13,377 [INFO] == Stage 1: contrastive pretraining (0 epochs) ==
-2026-08-25 00:21:13,951 [INFO] == Stage 2: nnPU training (7 epochs, π=0.120) ==
-2026-08-25 00:21:13,951 [INFO] PU prior: pool pi=0.1200 -> unlabeled pi=0.1007 (|P|=1590, |U|=72318); nnPU requires the prior inside U
-2026-08-25 00:21:13,952 [INFO] Stage-2 trainability: mode=full | 1 group(s) lrs=['1.00e-04'] | trainable=817,986 params | frozen=0 params
-2026-08-25 00:21:13,952 [INFO] Positive exposure [nnPU]: ~61184 positive samples/epoch = 38.48 pass(es) over |P|=1590
-2026-08-25 00:28:59,115 [INFO] [nnPU epoch 0] steps=239 loss=0.9244 pr_auc=0.7870 bestF1=0.6876 fn_recall=0.8076 thr=0.256 lr=1.00e-04 defit=32%
-2026-08-25 00:36:42,470 [INFO] [nnPU epoch 1] steps=239 loss=0.6123 pr_auc=0.8115 bestF1=0.7081 fn_recall=0.7886 thr=0.290 lr=1.00e-04 defit=48%
-2026-08-25 00:44:25,982 [INFO] [nnPU epoch 2] steps=239 loss=0.5352 pr_auc=0.7437 bestF1=0.6628 fn_recall=0.7362 thr=0.235 lr=1.00e-04 defit=46%
-2026-08-25 00:52:09,022 [INFO] [nnPU epoch 3] steps=239 loss=0.4940 pr_auc=0.7451 bestF1=0.6620 fn_recall=0.8528 thr=0.296 lr=1.00e-04 defit=45%
-2026-08-25 00:59:52,032 [INFO] [nnPU epoch 4] steps=239 loss=0.4674 pr_auc=0.7481 bestF1=0.6633 fn_recall=0.8571 thr=0.373 lr=1.00e-04 defit=46%
-2026-08-25 01:07:35,251 [INFO] [nnPU epoch 5] steps=239 loss=0.4429 pr_auc=0.6736 bestF1=0.6030 fn_recall=0.6108 thr=0.254 lr=1.00e-04 defit=48%
-2026-08-25 01:15:18,260 [INFO] [nnPU epoch 6] steps=239 loss=0.4327 pr_auc=0.7671 bestF1=0.7052 fn_recall=0.7536 thr=0.328 lr=1.00e-04 defit=44%
-2026-08-25 01:15:18,260 [INFO] Best checkpoint: pr_auc=0.8115
-2026-08-25 01:15:23,873 [INFO] PriorCorrection: pi_train=0.1007 pi_target=0.0826 shift=-0.2175
-2026-08-25 01:15:23,873 [INFO]   prior_correction log-loss: 0.18543
-2026-08-25 01:15:23,880 [INFO] Platt scaling: a=3.6304 b=2.5324
-2026-08-25 01:15:23,881 [INFO]   platt log-loss: 0.10969
-2026-08-25 01:15:24,054 [INFO] Isotonic calibration: 38 knots, range [0.0000, 1.0000]
-2026-08-25 01:15:24,055 [INFO]   isotonic log-loss: 0.10815
-2026-08-25 01:15:24,055 [INFO] Selected calibrator: isotonic (log-loss=0.10815)
-2026-08-25 01:15:29,219 [INFO] Test Metrics (calibrated, threshold=0.5):
-2026-08-25 01:15:29,219 [INFO]   threshold: 0.5000
-2026-08-25 01:15:29,219 [INFO]   f1: 0.5878
-2026-08-25 01:15:29,219 [INFO]   precision: 0.5389
-2026-08-25 01:15:29,219 [INFO]   recall: 0.6466
-2026-08-25 01:15:29,219 [INFO]   average_precision: 0.6236
-2026-08-25 01:15:29,219 [INFO]   pr_auc: 0.6236
-2026-08-25 01:15:29,219 [INFO]   selection_policy: validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5
-2026-08-25 01:15:29,219 [INFO]   oracle_diagnostics: {'test_best_f1': 0.6057488322257996, 'test_best_threshold': 0.3428957164287567, 'test_precision_at_best_f1': 0.5149176716804504, 'test_recall_at_best_f1': 0.7354885935783386}
-2026-08-25 01:15:29,219 [INFO]   calibrator: isotonic
-2026-08-25 01:15:29,220 [INFO]   val_threshold_raw: 0.2905
-2026-08-25 01:15:36,877 [INFO] Saved 16621 val samples to artifacts/article_1/runs/mutation-set/scratch_full_pu/val_samples.json
-2026-08-25 01:15:36,877 [INFO] Saved 16621 val samples to artifacts/article_1/runs/mutation-set/scratch_full_pu/val_samples.json
-2026-08-25 01:15:44,039 [INFO] Saved 15296 test samples to artifacts/article_1/runs/mutation-set/scratch_full_pu/test_samples.json
-2026-08-25 01:15:44,039 [INFO] Saved 15296 test samples to artifacts/article_1/runs/mutation-set/scratch_full_pu/test_samples.json
+2026-08-25 18:37:16,368 [INFO] Global seed set to 1547565955
+2026-08-25 18:37:16,368 [INFO] Model type: tcn_2way | Device: cuda
+2026-08-25 18:37:16,368 [WARNING] No Stage-1 pretraining and no --pretrained checkpoint: the backbone starts from random weights.
+2026-08-25 18:37:17,159 [INFO] Train P (alerted=1): 1590, Train U (alerted=0): 72318
+2026-08-25 18:37:17,159 [INFO] Val: 16621, Test: 15296
+2026-08-25 18:37:17,160 [INFO] Building model type 'tcn_2way'
+2026-08-25 18:37:17,168 [INFO] Model parameters: 817,986
+2026-08-25 18:37:17,783 [INFO] Pretrain train (all): 73908 records (alerted=1: 1590, is_attack=1: 10200)
+2026-08-25 18:37:17,784 [INFO] == Stage 1: contrastive pretraining (0 epochs) ==
+2026-08-25 18:37:18,408 [INFO] == Stage 2: nnPU training (7 epochs, π=0.120) ==
+2026-08-25 18:37:18,408 [INFO] PU prior: pool pi=0.1200 -> unlabeled pi=0.1007 (|P|=1590, |U|=72318); nnPU requires the prior inside U
+2026-08-25 18:37:18,409 [INFO] Stage-2 trainability: mode=full | 1 group(s) lrs=['1.00e-04'] | trainable=817,986 params | frozen=0 params
+2026-08-25 18:37:18,409 [INFO] Positive exposure [nnPU]: ~61184 positive samples/epoch = 38.48 pass(es) over |P|=1590
+2026-08-25 18:45:03,767 [INFO] [nnPU epoch 0] steps=239 loss=0.9556 pr_auc=0.5248 bestF1=0.5273 fn_recall=0.5350 thr=0.281 lr=1.00e-04 defit=31%
+2026-08-25 18:52:46,831 [INFO] [nnPU epoch 1] steps=239 loss=0.6631 pr_auc=0.5880 bestF1=0.5632 fn_recall=0.5889 thr=0.143 lr=1.00e-04 defit=48%
+2026-08-25 19:00:29,689 [INFO] [nnPU epoch 2] steps=239 loss=0.5754 pr_auc=0.6704 bestF1=0.5675 fn_recall=0.4898 thr=0.282 lr=1.00e-04 defit=45%
+2026-08-25 19:08:12,681 [INFO] [nnPU epoch 3] steps=239 loss=0.5254 pr_auc=0.5960 bestF1=0.5229 fn_recall=0.8353 thr=0.229 lr=1.00e-04 defit=47%
+2026-08-25 19:15:55,743 [INFO] [nnPU epoch 4] steps=239 loss=0.5006 pr_auc=0.6200 bestF1=0.5195 fn_recall=0.7843 thr=0.245 lr=1.00e-04 defit=45%
+2026-08-25 19:23:38,647 [INFO] [nnPU epoch 5] steps=239 loss=0.4717 pr_auc=0.6096 bestF1=0.6478 fn_recall=0.8047 thr=0.329 lr=1.00e-04 defit=47%
+2026-08-25 19:31:21,656 [INFO] [nnPU epoch 6] steps=239 loss=0.4455 pr_auc=0.5060 bestF1=0.5426 fn_recall=0.7974 thr=0.202 lr=1.00e-04 defit=48%
+2026-08-25 19:31:21,656 [INFO] Best checkpoint: pr_auc=0.6704
+2026-08-25 19:31:27,442 [INFO] PriorCorrection: pi_train=0.1007 pi_target=0.0826 shift=-0.2175
+2026-08-25 19:31:27,442 [INFO]   prior_correction log-loss: 0.20484
+2026-08-25 19:31:27,451 [INFO] Platt scaling: a=3.1039 b=2.6278
+2026-08-25 19:31:27,451 [INFO]   platt log-loss: 0.15126
+2026-08-25 19:31:27,645 [INFO] Isotonic calibration: 30 knots, range [0.0000, 1.0000]
+2026-08-25 19:31:27,646 [INFO]   isotonic log-loss: 0.14110
+2026-08-25 19:31:27,646 [INFO] Selected calibrator: isotonic (log-loss=0.14110)
+2026-08-25 19:31:32,993 [INFO] Test Metrics (calibrated, threshold=0.5):
+2026-08-25 19:31:32,993 [INFO]   threshold: 0.5000
+2026-08-25 19:31:32,994 [INFO]   f1: 0.4236
+2026-08-25 19:31:32,994 [INFO]   precision: 0.4148
+2026-08-25 19:31:32,994 [INFO]   recall: 0.4328
+2026-08-25 19:31:32,994 [INFO]   average_precision: 0.4926
+2026-08-25 19:31:32,994 [INFO]   pr_auc: 0.4926
+2026-08-25 19:31:32,994 [INFO]   selection_policy: validation-selected checkpoint and calibrator; fixed calibrated threshold=0.5
+2026-08-25 19:31:32,994 [INFO]   oracle_diagnostics: {'test_best_f1': 0.4870370626449585, 'test_best_threshold': 0.2586948275566101, 'test_precision_at_best_f1': 0.4199042022228241, 'test_recall_at_best_f1': 0.5797207951545715}
+2026-08-25 19:31:32,994 [INFO]   calibrator: isotonic
+2026-08-25 19:31:32,994 [INFO]   val_threshold_raw: 0.2816
+2026-08-25 19:31:40,920 [INFO] Saved 16621 val samples to artifacts/article_1/runs/mutation-set/scratch_full_pu/val_samples.json
+2026-08-25 19:31:40,920 [INFO] Saved 16621 val samples to artifacts/article_1/runs/mutation-set/scratch_full_pu/val_samples.json
+2026-08-25 19:31:48,104 [INFO] Saved 15296 test samples to artifacts/article_1/runs/mutation-set/scratch_full_pu/test_samples.json
+2026-08-25 19:31:48,104 [INFO] Saved 15296 test samples to artifacts/article_1/runs/mutation-set/scratch_full_pu/test_samples.json

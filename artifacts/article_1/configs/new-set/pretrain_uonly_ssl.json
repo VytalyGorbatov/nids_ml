@@ -29,7 +29,7 @@
     "proj_dim": 192,
     "type": "tcn_2way"
   },
-  "seed": 137744799,
+  "seed": 1547565955,
   "training": {
     "batch_size": 256,
     "clip_grad": 1.0,

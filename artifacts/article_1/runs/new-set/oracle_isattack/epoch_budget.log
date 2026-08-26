@@ -1,12 +1,12 @@
 Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6, 7] | budgets: [0.01, 0.05, 0.1]
-[epoch 0] test_average_precision=0.9204 | R@1%=0.8127(fp+332), R@5%=0.9143(fp+628), R@10%=0.9583(fp+1291)
-[epoch 1] test_average_precision=0.9261 | R@1%=0.9049(fp+471), R@5%=0.9231(fp+694), R@10%=0.9413(fp+1052)
-[epoch 2] test_average_precision=0.9342 | R@1%=0.9049(fp+387), R@5%=0.9378(fp+861), R@10%=0.9695(fp+1680)
-[epoch 3] test_average_precision=0.9451 | R@1%=0.9102(fp+397), R@5%=0.9589(fp+1054), R@10%=0.9877(fp+2110)
-[epoch 4] test_average_precision=0.9456 | R@1%=0.9166(fp+408), R@5%=0.9712(fp+1035), R@10%=0.9918(fp+2101)
-[epoch 5] test_average_precision=0.9568 | R@1%=0.9237(fp+410), R@5%=0.9789(fp+1138), R@10%=0.9941(fp+2213)
-[epoch 6] test_average_precision=0.9625 | R@1%=0.9342(fp+402), R@5%=0.9877(fp+1215), R@10%=0.9959(fp+2225)
-[epoch 7] test_average_precision=0.9526 | R@1%=0.9501(fp+407), R@5%=0.9912(fp+1224), R@10%=0.9988(fp+2250)
+[epoch 0] test_average_precision=0.9264 | R@1%=0.8291(fp+441), R@5%=0.9137(fp+687), R@10%=0.9724(fp+1319)
+[epoch 1] test_average_precision=0.9299 | R@1%=0.9107(fp+571), R@5%=0.9278(fp+688), R@10%=0.9683(fp+1189)
+[epoch 2] test_average_precision=0.9409 | R@1%=0.9143(fp+530), R@5%=0.9395(fp+719), R@10%=0.9794(fp+1209)
+[epoch 3] test_average_precision=0.9475 | R@1%=0.9178(fp+436), R@5%=0.9642(fp+836), R@10%=0.9912(fp+1370)
+[epoch 4] test_average_precision=0.9545 | R@1%=0.9196(fp+446), R@5%=0.9730(fp+894), R@10%=0.9965(fp+1501)
+[epoch 5] test_average_precision=0.9596 | R@1%=0.9319(fp+472), R@5%=0.9830(fp+954), R@10%=0.9971(fp+1572)
+[epoch 6] test_average_precision=0.9620 | R@1%=0.9401(fp+457), R@5%=0.9871(fp+970), R@10%=0.9971(fp+1630)
+[epoch 7] test_average_precision=0.9655 | R@1%=0.9413(fp+438), R@5%=0.9894(fp+1053), R@10%=0.9959(fp+1746)
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/oracle_isattack/epoch_budget_matrix.json
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/oracle_isattack/epoch_budget_matrix.md
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/oracle_isattack/validation_selected_results.json
