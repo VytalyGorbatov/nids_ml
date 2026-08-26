@@ -1,12 +1,12 @@
 Device: cuda | epochs: [0, 1, 2, 3, 4, 5, 6, 7] | budgets: [0.01, 0.05, 0.1]
-[epoch 0] test_average_precision=0.8866 | R@1%=0.8477(fp+791), R@5%=0.9810(fp+1146), R@10%=0.9985(fp+2950)
-[epoch 1] test_average_precision=0.8910 | R@1%=0.8624(fp+758), R@5%=0.9839(fp+1130), R@10%=1.0000(fp+2257)
-[epoch 2] test_average_precision=0.9084 | R@1%=0.9136(fp+779), R@5%=0.9985(fp+1230), R@10%=1.0000(fp+2513)
-[epoch 3] test_average_precision=0.9166 | R@1%=0.9546(fp+764), R@5%=0.9985(fp+1319), R@10%=1.0000(fp+2498)
-[epoch 4] test_average_precision=0.9325 | R@1%=0.9766(fp+767), R@5%=1.0000(fp+1643), R@10%=1.0000(fp+2844)
-[epoch 5] test_average_precision=0.9425 | R@1%=0.9898(fp+775), R@5%=1.0000(fp+1698), R@10%=1.0000(fp+2751)
-[epoch 6] test_average_precision=0.9522 | R@1%=0.9898(fp+812), R@5%=1.0000(fp+1771), R@10%=1.0000(fp+2720)
-[epoch 7] test_average_precision=0.9586 | R@1%=0.9971(fp+841), R@5%=1.0000(fp+1772), R@10%=1.0000(fp+2619)
+[epoch 0] test_average_precision=0.9085 | R@1%=0.8990(fp+773), R@5%=0.9824(fp+1150), R@10%=1.0000(fp+2461)
+[epoch 1] test_average_precision=0.9369 | R@1%=0.9693(fp+748), R@5%=1.0000(fp+1147), R@10%=1.0000(fp+1830)
+[epoch 2] test_average_precision=0.9643 | R@1%=0.9956(fp+684), R@5%=1.0000(fp+1221), R@10%=1.0000(fp+2101)
+[epoch 3] test_average_precision=0.9707 | R@1%=1.0000(fp+678), R@5%=1.0000(fp+1259), R@10%=1.0000(fp+2285)
+[epoch 4] test_average_precision=0.9806 | R@1%=1.0000(fp+686), R@5%=1.0000(fp+1415), R@10%=1.0000(fp+2431)
+[epoch 5] test_average_precision=0.9826 | R@1%=1.0000(fp+709), R@5%=1.0000(fp+1547), R@10%=1.0000(fp+2674)
+[epoch 6] test_average_precision=0.9850 | R@1%=1.0000(fp+692), R@5%=1.0000(fp+1703), R@10%=1.0000(fp+2857)
+[epoch 7] test_average_precision=0.9901 | R@1%=1.0000(fp+645), R@5%=1.0000(fp+1572), R@10%=1.0000(fp+2783)
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/mutation-set/oracle_isattack/epoch_budget_matrix.json
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/mutation-set/oracle_isattack/epoch_budget_matrix.md
 Saved /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/mutation-set/oracle_isattack/validation_selected_results.json

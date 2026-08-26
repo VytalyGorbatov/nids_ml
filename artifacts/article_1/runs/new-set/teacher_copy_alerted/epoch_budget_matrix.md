@@ -4,14 +4,14 @@ Each cell = R (Snort-FN recovery) / benign FP added, at a val-selected FPR budge
 
 ## Reportable Validation Selection
 
-Checkpoint policy: maximum validation AP. Selected epoch: 5 (validation AP=0.8909).
+Checkpoint policy: maximum validation AP. Selected epoch: 4 (validation AP=0.9029).
 The following test values use that single validation-selected checkpoint.
 
 | nominal FPR budget | threshold | Snort-FN recovery | added benign FP | observed test FPR |
 |---|---:|---:|---:|---:|
-| 1% | 0.0030 | 0.7704 | 449 | 2.9886% |
-| 5% | 0.0006 | 0.9219 | 1256 | 8.3600% |
-| 10% | 0.0002 | 0.9536 | 1859 | 12.3735% |
+| 1% | 0.0039 | 0.7275 | 677 | 4.5061% |
+| 5% | 0.0009 | 0.8784 | 1504 | 10.0106% |
+| 10% | 0.0003 | 0.9366 | 2147 | 14.2905% |
 
 ## All Epochs (Diagnostic)
 
@@ -19,13 +19,13 @@ Do not choose an epoch from this table using test results.
 
 | epoch | FPR<=1% | FPR<=5% | FPR<=10% | test AP |
 |---|---|---|---|---|
-| 0 | 0.6119 / 95 | 0.7381 / 500 | 0.8732 / 1681 | 0.8647 |
-| 1 | 0.6224 / 159 | 0.7874 / 508 | 0.8937 / 1109 | 0.8941 |
-| 2 | 0.6207 / 134 | 0.8238 / 583 | 0.9360 / 1622 | 0.9068 |
-| 3 | 0.6494 / 252 | 0.8297 / 654 | 0.9436 / 1624 | 0.8953 |
-| 4 | 0.7005 / 317 | 0.8732 / 917 | 0.9436 / 1672 | 0.9039 |
-| 5 | 0.7704 / 449 | 0.9219 / 1256 | 0.9536 / 1859 | 0.9086 |
-| 6 | 0.7821 / 537 | 0.9213 / 1239 | 0.9448 / 1816 | 0.8968 |
+| 0 | 0.5849 / 10 | 0.7223 / 441 | 0.8861 / 1645 | 0.8784 |
+| 1 | 0.5479 / 89 | 0.7493 / 590 | 0.9583 / 1994 | 0.8852 |
+| 2 | 0.6600 / 314 | 0.8420 / 1113 | 0.9548 / 1993 | 0.8860 |
+| 3 | 0.7017 / 671 | 0.8802 / 1471 | 0.9612 / 2052 | 0.8449 |
+| 4 | 0.7275 / 677 | 0.8784 / 1504 | 0.9366 / 2147 | 0.8631 |
+| 5 | 0.6406 / 661 | 0.8315 / 1462 | 0.9055 / 2190 | 0.8259 |
+| 6 | 0.5073 / 483 | 0.7305 / 1267 | 0.8567 / 2093 | 0.7946 |
 | 7 | 0.1715 / 6 | 0.4463 / 713 | 0.5866 / 2270 | 0.5626 |
 
 ## Test-Oracle Diagnostics (Not Reportable)
@@ -34,6 +34,6 @@ These entries retrospectively choose an epoch on test data and are diagnostics o
 
 | nominal FPR budget | test-selected epoch | recovery | observed test FPR |
 |---|---:|---:|---:|
-| 1% | 6 | 0.7821 | 3.5743% |
-| 5% | 5 | 0.9219 | 8.3600% |
-| 10% | 5 | 0.9536 | 12.3735% |
+| 1% | 4 | 0.7275 | 4.5061% |
+| 5% | 3 | 0.8802 | 9.7910% |
+| 10% | 3 | 0.9612 | 13.6581% |

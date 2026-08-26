@@ -25,7 +25,7 @@
   "sampling": {
     "with_replacement": false
   },
-  "seed": 1547565955,
+  "seed": 703598092,
   "model": {
     "type": "cnn",
     "vocab_size": 257,

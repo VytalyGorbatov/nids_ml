@@ -5,36 +5,36 @@
   "operating_points": [
     {
       "budget_strictly_below": 0.01,
-      "threshold": 0.5287,
+      "threshold": 0.5862,
       "maximum_allowed_benign_fp": 139,
       "benign_total": 13935,
       "benign_fp": 139,
       "benign_fpr": 0.009974883387154647,
       "snort_fn_total": 683,
-      "snort_fn_recovered": 158,
-      "snort_fn_recovery": 0.23133235724743778
+      "snort_fn_recovered": 279,
+      "snort_fn_recovery": 0.4084919472913616
     },
     {
       "budget_strictly_below": 0.05,
-      "threshold": 0.4019,
+      "threshold": 0.4255,
       "maximum_allowed_benign_fp": 696,
       "benign_total": 13935,
       "benign_fp": 696,
       "benign_fpr": 0.049946178686759955,
       "snort_fn_total": 683,
-      "snort_fn_recovered": 214,
-      "snort_fn_recovery": 0.31332357247437775
+      "snort_fn_recovered": 546,
+      "snort_fn_recovery": 0.7994143484626647
     },
     {
       "budget_strictly_below": 0.1,
-      "threshold": 0.225,
+      "threshold": 0.2867,
       "maximum_allowed_benign_fp": 1393,
       "benign_total": 13935,
       "benign_fp": 1393,
       "benign_fpr": 0.09996411912450663,
       "snort_fn_total": 683,
-      "snort_fn_recovered": 394,
-      "snort_fn_recovery": 0.5768667642752562
+      "snort_fn_recovered": 587,
+      "snort_fn_recovery": 0.8594436310395315
     }
   ]
 }

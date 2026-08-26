@@ -4,14 +4,14 @@ Each cell = R (Snort-FN recovery) / benign FP added, at a val-selected FPR budge
 
 ## Reportable Validation Selection
 
-Checkpoint policy: maximum validation AP. Selected epoch: 2 (validation AP=0.6704).
+Checkpoint policy: maximum validation AP. Selected epoch: 2 (validation AP=0.8879).
 The following test values use that single validation-selected checkpoint.
 
 | nominal FPR budget | threshold | Snort-FN recovery | added benign FP | observed test FPR |
 |---|---:|---:|---:|---:|
-| 1% | 0.3067 | 0.4495 | 916 | 6.5734% |
-| 5% | 0.2306 | 0.5622 | 1326 | 9.5156% |
-| 10% | 0.1904 | 0.7116 | 2350 | 16.8640% |
+| 1% | 0.4369 | 0.7775 | 644 | 4.6215% |
+| 5% | 0.2565 | 0.9034 | 1753 | 12.5798% |
+| 10% | 0.2032 | 0.9649 | 2668 | 19.1460% |
 
 ## All Epochs (Diagnostic)
 
@@ -19,13 +19,13 @@ Do not choose an epoch from this table using test results.
 
 | epoch | FPR<=1% | FPR<=5% | FPR<=10% | test AP |
 |---|---|---|---|---|
-| 0 | 0.2196 / 605 | 0.5242 / 1649 | 0.7291 / 3032 | 0.3366 |
-| 1 | 0.3163 / 655 | 0.5520 / 1611 | 0.7204 / 2572 | 0.3694 |
-| 2 | 0.4495 / 916 | 0.5622 / 1326 | 0.7116 / 2350 | 0.4926 |
-| 3 | 0.3060 / 342 | 0.4949 / 1247 | 0.7379 / 2064 | 0.5616 |
-| 4 | 0.3572 / 314 | 0.5710 / 1177 | 0.7101 / 2216 | 0.6050 |
-| 5 | 0.2958 / 154 | 0.7101 / 1045 | 0.9209 / 2384 | 0.6051 |
-| 6 | 0.2679 / 260 | 0.5871 / 1222 | 0.7233 / 1792 | 0.5273 |
+| 0 | 0.7657 / 1620 | 0.8697 / 2873 | 0.9634 / 3741 | 0.4632 |
+| 1 | 0.7042 / 1465 | 0.8682 / 2554 | 0.9751 / 3021 | 0.6144 |
+| 2 | 0.7775 / 644 | 0.9034 / 1753 | 0.9649 / 2668 | 0.7749 |
+| 3 | 0.5827 / 616 | 0.8067 / 1385 | 0.9385 / 2663 | 0.6944 |
+| 4 | 0.5095 / 331 | 0.8463 / 1200 | 0.9546 / 2203 | 0.7108 |
+| 5 | 0.4026 / 208 | 0.7365 / 1267 | 0.8917 / 2253 | 0.6875 |
+| 6 | 0.5373 / 330 | 0.8668 / 1172 | 0.9780 / 2089 | 0.7502 |
 
 ## Test-Oracle Diagnostics (Not Reportable)
 
@@ -33,6 +33,6 @@ These entries retrospectively choose an epoch on test data and are diagnostics o
 
 | nominal FPR budget | test-selected epoch | recovery | observed test FPR |
 |---|---:|---:|---:|
-| 1% | 2 | 0.4495 | 6.5734% |
-| 5% | 5 | 0.7101 | 7.4991% |
-| 10% | 5 | 0.9209 | 17.1080% |
+| 1% | 2 | 0.7775 | 4.6215% |
+| 5% | 2 | 0.9034 | 12.5798% |
+| 10% | 6 | 0.9780 | 14.9910% |

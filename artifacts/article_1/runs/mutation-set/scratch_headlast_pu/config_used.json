@@ -39,7 +39,7 @@
     "proj_dim": 192,
     "type": "tcn_2way"
   },
-  "seed": 1547565955,
+  "seed": 703598092,
   "stage1_provenance": {
     "max_epochs_pretrain": 0,
     "pretrained_path": null,
