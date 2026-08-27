@@ -1,0 +1,32 @@
+2026-09-01 14:05:48,562 [INFO] Global seed set to 703598092
+2026-09-01 14:05:48,562 [INFO] Model type: lstm | Device: cuda
+2026-09-01 14:05:49,051 [INFO] Split train (train_label): Total=73908, Pos=1590, Neg=72318
+2026-09-01 14:05:49,061 [INFO] Split train (split_label): Total=73908, Pos=10200, Neg=63708
+2026-09-01 14:05:49,187 [INFO] Split val (train_label): Total=16621, Pos=687, Neg=15934
+2026-09-01 14:05:49,189 [INFO] Split val (split_label): Total=16621, Pos=1373, Neg=15248
+2026-09-01 14:05:49,309 [INFO] Split test (train_label): Total=15296, Pos=678, Neg=14618
+2026-09-01 14:05:49,311 [INFO] Split test (split_label): Total=15296, Pos=1361, Neg=13935
+2026-09-01 14:05:49,311 [INFO] Building model type 'lstm'
+2026-09-01 14:05:49,977 [INFO] Starting training for 15 epochs on cuda...
+2026-09-01 14:08:45,398 [INFO] Epoch 1/15 | Train Loss: 0.3212 | Val Loss: 0.4088 | Val Acc: 0.5476 | Val F1: 0.1310 | LR: 3.00e-04 | No-improve: 0/7
+2026-09-01 14:11:39,907 [INFO] Epoch 2/15 | Train Loss: 0.2423 | Val Loss: 0.4079 | Val Acc: 0.5470 | Val F1: 0.1311 | LR: 3.00e-04 | No-improve: 0/7
+2026-09-01 14:14:33,379 [INFO] Epoch 3/15 | Train Loss: 0.2424 | Val Loss: 0.4004 | Val Acc: 0.6477 | Val F1: 0.1173 | LR: 3.00e-04 | No-improve: 0/7
+2026-09-01 14:17:28,990 [INFO] Epoch 4/15 | Train Loss: 0.2424 | Val Loss: 0.4074 | Val Acc: 0.7317 | Val F1: 0.1306 | LR: 3.00e-04 | No-improve: 1/7
+2026-09-01 14:20:23,722 [INFO] Epoch 5/15 | Train Loss: 0.2421 | Val Loss: 0.4009 | Val Acc: 0.8935 | Val F1: 0.1079 | LR: 3.00e-04 | No-improve: 2/7
+2026-09-01 14:23:18,830 [INFO] Epoch 6/15 | Train Loss: 0.2420 | Val Loss: 0.3942 | Val Acc: 0.8934 | Val F1: 0.1078 | LR: 3.00e-04 | No-improve: 3/7
+2026-09-01 14:26:13,377 [INFO] Epoch 7/15 | Train Loss: 0.2423 | Val Loss: 0.4091 | Val Acc: 0.8934 | Val F1: 0.1078 | LR: 3.00e-04 | No-improve: 4/7
+2026-09-01 14:29:08,339 [INFO] Epoch 8/15 | Train Loss: 0.2423 | Val Loss: 0.4104 | Val Acc: 0.8937 | Val F1: 0.1080 | LR: 3.00e-04 | No-improve: 5/7
+2026-09-01 14:32:03,169 [INFO] Epoch 9/15 | Train Loss: 0.2423 | Val Loss: 0.4058 | Val Acc: 0.8934 | Val F1: 0.1078 | LR: 3.00e-04 | No-improve: 6/7
+2026-09-01 14:34:58,146 [INFO] Epoch 10/15 | Train Loss: 0.2422 | Val Loss: 0.4006 | Val Acc: 0.8934 | Val F1: 0.1078 | LR: 3.00e-04 | No-improve: 7/7
+2026-09-01 14:34:58,146 [INFO] Early stopping triggered: no improvement for 7 epochs.
+2026-09-01 14:34:58,149 [INFO] Best model saved with f1=0.1311
+2026-09-01 14:35:08,316 [INFO] Test Metrics:
+2026-09-01 14:35:08,316 [INFO]   accuracy: 0.5303
+2026-09-01 14:35:08,316 [INFO]   precision: 0.0759
+2026-09-01 14:35:08,316 [INFO]   recall: 0.8584
+2026-09-01 14:35:08,316 [INFO]   f1: 0.1394
+2026-09-01 14:35:08,316 [INFO]   threshold: 0.0599
+2026-09-01 14:35:08,316 [INFO]   best_threshold: 0.0599
+2026-09-01 14:35:08,316 [INFO]   loss: 0.4318
+2026-09-01 14:35:20,955 [INFO] Saved 16621 val samples to artifacts/article_1/runs/mutation-set/baseline_lstm_alerted/val_samples.json
+2026-09-01 14:35:32,264 [INFO] Saved 15296 test samples to artifacts/article_1/runs/mutation-set/baseline_lstm_alerted/test_samples.json

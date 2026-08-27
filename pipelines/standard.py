@@ -7,8 +7,10 @@ import torch
 from torch.utils.data import DataLoader
 
 from ..data import DatasetBuilder
+from ..data.common import to_device
 from ..models import build_model
-from ..training.standard import Trainer, _is_dict_model
+from ..training.losses import unlabeled_prior_from_pool
+from ..training.standard import Trainer, _is_dict_model, model_input
 from ..local_types import Metrics
 
 logger = logging.getLogger(__name__)
@@ -56,6 +58,18 @@ class ClassifierPipeline:
 
         pu_prior_cfg = training_cfg.get("pu_prior")
         pu_prior = float(pu_prior_cfg) if pu_prior_cfg is not None else None
+        target_field = str(self.config.get("data", {}).get("label_field", "alerted"))
+        if pu_prior is not None and training_cfg.get("pu_prior_scope", "unlabeled") == "pool":
+            train_records = getattr(loaders["train"].dataset, "records", None)
+            if train_records is None:
+                raise ValueError("Cannot derive an unlabeled PU prior from this train dataset")
+            positive_count = sum(int(record.get(target_field, 0)) == 1 for record in train_records)
+            unlabeled_count = len(train_records) - positive_count
+            pu_prior = unlabeled_prior_from_pool(pu_prior, positive_count, unlabeled_count)
+            logger.info(
+                "PU prior: pool pi=%.4f -> unlabeled pi=%.4f (|P|=%s, |U|=%s)",
+                float(pu_prior_cfg), pu_prior, positive_count, unlabeled_count,
+            )
 
         trainer = Trainer(
             model=model,
@@ -68,6 +82,7 @@ class ClassifierPipeline:
             patience=int(training_cfg.get("patience", 0)),
             lr_scheduler_cfg=training_cfg.get("lr_scheduler"),
             pu_prior=pu_prior,
+            target_field=target_field,
         )
 
         history, best_metrics, last_state = trainer.train(
@@ -102,14 +117,14 @@ class ClassifierPipeline:
             logger.warning("Dry run skipped: empty train loader.")
             return
         batch = next(iter(loader))
-        batch = {k: v.to(self.device) for k, v in batch.items()}
+        batch = to_device(batch, self.device)
         model = model.to(self.device)
         dict_mode = _is_dict_model(model)
         with torch.no_grad():
             if dict_mode:
                 out = model(batch)
             else:
-                ids = torch.cat([batch["header_ids"], batch["body_ids"]], dim=1)
+                ids = model_input(model, batch)
                 out = model(ids)
         logger.info("Forward pass successful. Shape: %s", tuple(out.shape))
 
@@ -147,15 +162,13 @@ class ClassifierPipeline:
         with torch.no_grad():
             for batch in loader:
                 if isinstance(batch, dict):
-                    batch = {k: v.to(self.device) for k, v in batch.items()}
+                    batch = to_device(batch, self.device)
                     is_attack = batch.get("is_attack")
                     alerted = batch.get("alerted")
                     if dict_mode:
                         logits = model(batch)
                     else:
-                        ids = torch.cat(
-                            [batch["header_ids"], batch["body_ids"]], dim=1,
-                        )
+                        ids = model_input(model, batch)
                         logits = model(ids)
                     n = batch["header_ids"].shape[0]
                 else:

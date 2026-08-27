@@ -1,8 +1,8 @@
 """Data loading for the standard training pipeline.
 
 Uses byte-ID representation (integers 0-255, PAD=256) with header/body split,
-matching the 2-way pipeline's data format.  Preserves attack_percent sampling
-logic for controlling the positive/negative ratio in train/val splits.
+matching the 2-way pipeline's data format. Supports optional positive/negative
+resampling in train/val splits.
 """
 from __future__ import annotations
 
@@ -20,7 +20,9 @@ from .common import (
     DataConfig2Way,
     PAD_IDX,
     SEP_BYTE,
+    buffer_sha256,
     decode_buffers_field,
+    extract_record_call_id,
     split_header_body,
     twoway_collate_fn,
 )
@@ -56,8 +58,14 @@ class RecordDataset(Dataset):
         return {
             "header_ids": header_ids,
             "body_ids": body_ids,
+            "call_id": extract_record_call_id(r, self.cfg.buffer_field),
+            "source_index": int(r.get("source_index", idx)),
+            "source_class": r.get("source_class"),
+            "buffer_sha256": buffer_sha256(r[self.cfg.buffer_field]),
             "alerted": int(r.get("alerted", 0)),
             "is_attack": int(r.get("is_attack", 0)),
+            "loss_weight": float(r.get("loss_weight", 1.0)),
+            "pseudo_positive": int(r.get("pseudo_positive", 0)),
         }
 
 
@@ -65,7 +73,7 @@ class RecordDataset(Dataset):
 
 
 class DatasetBuilder:
-    """Loads JSON datasets, applies attack_percent sampling, returns RecordDatasets.
+    """Loads JSON datasets and optionally resamples train/validation labels.
 
     Produces datasets whose items are dicts with byte-ID sequences (header/body).
     Use ``build_loaders()`` for ready-to-iterate DataLoaders with the correct
@@ -96,12 +104,13 @@ class DatasetBuilder:
     # ── public API ──────────────────────────────────
 
     def build_datasets(self) -> Dict[str, RecordDataset]:
-        """Build train, val, test datasets with attack_percent sampling."""
+        """Build train, validation, and test datasets."""
         benign_paths_cfg = self.config.get("benign_paths", {})
         attack_paths_cfg = self.config.get("attack_paths", {})
         attack_percent = float(self.config.get("attack_percent", 0.5))
 
         sampling_cfg = self.config.get("sampling", {})
+        sampling_enabled = bool(sampling_cfg.get("enabled", True))
         with_replacement = bool(sampling_cfg.get("with_replacement", False))
 
         split_seed_offsets = {"train": 11, "val": 22, "test": 33}
@@ -111,12 +120,8 @@ class DatasetBuilder:
             benign_paths = DataUtils.ensure_path_list(benign_paths_cfg.get(split))
             attack_paths = DataUtils.ensure_path_list(attack_paths_cfg.get(split))
 
-            attack_records = self._load_group(
-                attack_paths, default_label=1, is_test_split=(split == "test"),
-            )
-            benign_records = self._load_group(
-                benign_paths, default_label=0, is_test_split=(split == "test"),
-            )
+            attack_records = self._load_group(attack_paths, default_label=1)
+            benign_records = self._load_group(benign_paths, default_label=0)
 
             all_records = attack_records + benign_records
 
@@ -126,6 +131,12 @@ class DatasetBuilder:
                 continue
 
             if split == "test":
+                datasets[split] = RecordDataset(all_records, self.cfg)
+                self._log_label_stats(split, all_records, "_train_label", "train_label")
+                self._log_label_stats(split, all_records, "_split_label", "split_label")
+                continue
+
+            if not sampling_enabled:
                 datasets[split] = RecordDataset(all_records, self.cfg)
                 self._log_label_stats(split, all_records, "_train_label", "train_label")
                 self._log_label_stats(split, all_records, "_split_label", "split_label")
@@ -178,16 +189,16 @@ class DatasetBuilder:
     # ── loading ─────────────────────────────────────
 
     def _load_group(
-        self, paths: List[Path], default_label: int, is_test_split: bool = False,
+        self, paths: List[Path], default_label: int,
     ) -> List[Dict[str, Any]]:
         """Load and concatenate records from multiple JSON files."""
         records: List[Dict[str, Any]] = []
         for p in paths:
-            records.extend(self._load_json_file(p, default_label, is_test_split))
+            records.extend(self._load_json_file(p, default_label))
         return records
 
     def _load_json_file(
-        self, path: Path, default_label: int, is_test_split: bool = False,
+        self, path: Path, default_label: int,
     ) -> List[Dict[str, Any]]:
         """Parse one JSON file into a list of record dicts."""
         try:
@@ -214,12 +225,9 @@ class DatasetBuilder:
             is_attack_val = 1 if int(rec.get("is_attack", default_label)) == 1 else 0
             split_label = is_attack_val
 
-            if is_test_split:
-                train_label = is_attack_val
-            else:
-                train_label = (
-                    1 if int(rec.get(self.label_field, default_label)) == 1 else 0
-                )
+            train_label = (
+                1 if int(rec.get(self.label_field, default_label)) == 1 else 0
+            )
 
             rec["_train_label"] = train_label
             rec["_split_label"] = split_label

@@ -3,7 +3,7 @@
 # "A Weakly Supervised Neural Risk-Scoring Method for Detecting Attacks Missed
 #  by Signature-Based NIDS"
 #
-# Runs the 7 training runs that back the headline + design-justification tables,
+# Runs the 10 training runs that back the headline + design-justification tables,
 # then computes per-epoch Snort-FN recovery (R@1/5/10%) for each via the offline
 # driver. Single set only — NO seed variation (author handles seeds separately).
 #
@@ -16,6 +16,9 @@
 #   A1  scratch_full_pu       — PU,                   full,            RANDOM init [SSL ablation, no --pretrained]
 #   A2  scratch_headlast_pu   — PU,                   head_last_block, RANDOM init [SSL ablation, no --pretrained]
 #   A3  method_headlast_pu_ssl_off — PU,              head_last_block, SSL init   [Stage-2 SSL ablation]
+#   baseline_cnn_alerted      — supervised(alerted),  CNN,             RANDOM init [baseline]
+#   baseline_lstm_alerted     — supervised(alerted),  LSTM,            RANDOM init [baseline]
+#   baseline_tcn_pu           — PU,                   TCN,             RANDOM init [baseline]
 #
 # Comparisons: B0→B2→M3→B3 (headline) | M3 vs M1 (trainability) |
 #              M3 vs A2 (Stage-1 SSL) | M3 vs A3 (Stage-2 SSL)
@@ -51,13 +54,16 @@ BUDGETS="0.01,0.05,0.10"
 
 # Run list: "config_basename:use_pretrained(1|0)"
 RUNS=(
-  "teacher_copy_alerted:1"
-  "method_headlast_pu:1"
-  "oracle_isattack:1"
-  "full_backbone_pu:1"
-  "scratch_full_pu:0"
-  "scratch_headlast_pu:0"
-  "method_headlast_pu_ssl_off:1"
+  # "teacher_copy_alerted:1"
+  # "method_headlast_pu:1"
+  # "oracle_isattack:1"
+  # "full_backbone_pu:1"
+  # "scratch_full_pu:0"
+  # "scratch_headlast_pu:0"
+  # "method_headlast_pu_ssl_off:1"
+  # "baseline_cnn_alerted:0"
+  "baseline_lstm_alerted:0"
+  # "baseline_tcn_pu:0"
 )
 
 # ─── Stage 1: shared U-only contrastive pretraining ────────────────────────
@@ -71,16 +77,16 @@ if (( DRY_RUN )); then
 else
   mkdir -p "$PKG_DIR/$PRETRAIN_DIR"
   PRETRAIN_MARKER="$(mktemp "${TMPDIR:-/tmp}/article1-pretrain-start.XXXXXX")"
-  ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
-      --config "$PRETRAIN_CFG" \
-      --device $DEVICE ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
-  pretrain_rc=${PIPESTATUS[0]}
+  # ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
+  #     --config "$PRETRAIN_CFG" \
+  #     --device $DEVICE ) 2>&1 | tee "$PKG_DIR/$PRETRAIN_DIR/train.log"
+  # pretrain_rc=${PIPESTATUS[0]}
 
-  if [[ $pretrain_rc -ne 0 ]]; then
-    rm -f "$PRETRAIN_MARKER"
-    echo "ERROR: Stage-1 pretraining failed (rc=$pretrain_rc)"
-    exit "$pretrain_rc"
-  fi
+  # if [[ $pretrain_rc -ne 0 ]]; then
+  #   rm -f "$PRETRAIN_MARKER"
+  #   echo "ERROR: Stage-1 pretraining failed (rc=$pretrain_rc)"
+  #   exit "$pretrain_rc"
+  # fi
 
   pretrain_epoch=-1
   for checkpoint in "$PKG_DIR/$PRETRAIN_DIR"/pretrain_epoch*.pt; do
@@ -166,7 +172,7 @@ for entry in "${RUNS[@]}"; do
   else
     ( cd "$PKG_DIR" && "$PYTHON_BIN" classifier_creator.py \
         --config "$CFG_DIR/$name.json" \
-        "${pt_args[@]}" \
+        "${pt_args[@]+"${pt_args[@]}"}" \
         --device $DEVICE ) 2>&1 | tee "$PKG_DIR/$run_dir/train.log"
     train_rc=${PIPESTATUS[0]}
   fi

@@ -21,8 +21,8 @@
     "sep_byte": 30,
     "split_by": "alerted"
   },
-  "attack_percent": 0.30,
   "sampling": {
+    "enabled": false,
     "with_replacement": false
   },
   "seed": 703598092,
@@ -49,8 +49,9 @@
     "epochs": 15,
     "learning_rate": 0.0001,
     "weight_decay": 0.0001,
-    "patience": 3,
+    "patience": 7,
     "pu_prior": 0.12,
+    "pu_prior_scope": "pool",
     "num_workers": 0
   }
 }

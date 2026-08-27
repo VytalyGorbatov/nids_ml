@@ -1,0 +1,32 @@
+2026-08-28 16:22:24,371 [INFO] Global seed set to 703598092
+2026-08-28 16:22:24,372 [INFO] Model type: cnn | Device: cuda
+2026-08-28 16:22:25,557 [INFO] Split train (train_label): Total=73908, Pos=1590, Neg=72318
+2026-08-28 16:22:25,568 [INFO] Split train (split_label): Total=73908, Pos=10200, Neg=63708
+2026-08-28 16:22:25,914 [INFO] Split val (train_label): Total=16621, Pos=687, Neg=15934
+2026-08-28 16:22:25,915 [INFO] Split val (split_label): Total=16621, Pos=1373, Neg=15248
+2026-08-28 16:22:26,028 [INFO] Split test (train_label): Total=15296, Pos=678, Neg=14618
+2026-08-28 16:22:26,030 [INFO] Split test (split_label): Total=15296, Pos=1361, Neg=13935
+2026-08-28 16:22:26,030 [INFO] Building model type 'cnn'
+2026-08-28 16:22:26,722 [INFO] Starting training for 15 epochs on cuda...
+2026-08-28 16:22:53,439 [INFO] Epoch 1/15 | Train Loss: 0.2494 | Val Loss: 0.2251 | Val Acc: 0.9587 | Val F1: 0.0000 | LR: 3.00e-04 | No-improve: 0/7
+2026-08-28 16:23:15,255 [INFO] Epoch 2/15 | Train Loss: 0.2141 | Val Loss: 0.1877 | Val Acc: 0.9587 | Val F1: 0.0000 | LR: 3.00e-04 | No-improve: 0/7
+2026-08-28 16:23:37,303 [INFO] Epoch 3/15 | Train Loss: 0.1809 | Val Loss: 0.1591 | Val Acc: 0.9587 | Val F1: 0.0000 | LR: 3.00e-04 | No-improve: 1/7
+2026-08-28 16:23:59,403 [INFO] Epoch 4/15 | Train Loss: 0.1459 | Val Loss: 0.1431 | Val Acc: 0.9581 | Val F1: 0.0279 | LR: 3.00e-04 | No-improve: 2/7
+2026-08-28 16:24:21,284 [INFO] Epoch 5/15 | Train Loss: 0.1188 | Val Loss: 0.1773 | Val Acc: 0.9586 | Val F1: 0.0000 | LR: 3.00e-04 | No-improve: 0/7
+2026-08-28 16:24:43,366 [INFO] Epoch 6/15 | Train Loss: 0.0980 | Val Loss: 0.1566 | Val Acc: 0.9582 | Val F1: 0.0142 | LR: 3.00e-04 | No-improve: 1/7
+2026-08-28 16:25:05,230 [INFO] Epoch 7/15 | Train Loss: 0.0788 | Val Loss: 0.1676 | Val Acc: 0.9578 | Val F1: 0.0168 | LR: 3.00e-04 | No-improve: 2/7
+2026-08-28 16:25:27,341 [INFO] Epoch 8/15 | Train Loss: 0.0672 | Val Loss: 0.2253 | Val Acc: 0.9586 | Val F1: 0.0000 | LR: 3.00e-04 | No-improve: 3/7
+2026-08-28 16:25:49,356 [INFO] Epoch 9/15 | Train Loss: 0.0530 | Val Loss: 0.3018 | Val Acc: 0.9587 | Val F1: 0.0000 | LR: 3.00e-04 | No-improve: 4/7
+2026-08-28 16:26:11,445 [INFO] Epoch 10/15 | Train Loss: 0.0413 | Val Loss: 0.2673 | Val Acc: 0.9585 | Val F1: 0.0000 | LR: 3.00e-04 | No-improve: 5/7
+2026-08-28 16:26:33,553 [INFO] Epoch 11/15 | Train Loss: 0.0324 | Val Loss: 0.2938 | Val Acc: 0.9586 | Val F1: 0.0000 | LR: 3.00e-04 | No-improve: 6/7
+2026-08-28 16:26:55,491 [INFO] Epoch 12/15 | Train Loss: 0.0302 | Val Loss: 0.2865 | Val Acc: 0.9585 | Val F1: 0.0000 | LR: 3.00e-04 | No-improve: 7/7
+2026-08-28 16:26:55,491 [INFO] Early stopping triggered: no improvement for 7 epochs.
+2026-08-28 16:26:55,494 [INFO] Best model saved with f1=0.0279
+2026-08-28 16:26:57,665 [INFO] Test Metrics:
+2026-08-28 16:26:57,665 [INFO]   accuracy: 0.9561
+2026-08-28 16:26:57,665 [INFO]   precision: 0.6522
+2026-08-28 16:26:57,665 [INFO]   recall: 0.0221
+2026-08-28 16:26:57,665 [INFO]   f1: 0.0428
+2026-08-28 16:26:57,665 [INFO]   loss: 0.1573
+2026-08-28 16:27:01,445 [INFO] Saved 16621 val samples to artifacts/article_1/runs/mutation-set/baseline_cnn_alerted/val_samples.json
+2026-08-28 16:27:04,908 [INFO] Saved 15296 test samples to artifacts/article_1/runs/mutation-set/baseline_cnn_alerted/test_samples.json

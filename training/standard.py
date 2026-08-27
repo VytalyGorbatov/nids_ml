@@ -9,10 +9,10 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from .base import BaseTrainer, EarlyStopper
-from .metrics import MetricUtils
+from .metrics import MetricUtils, pr_curve_best_f1
 from ..local_types import Metrics
 from .losses import PULoss
-from ..data.common import PAD_IDX
+from ..data.common import PAD_IDX, to_device
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,26 @@ logger = logging.getLogger(__name__)
 def _is_dict_model(model: nn.Module) -> bool:
     """Return True if the model's forward() expects a Dict[str, Tensor] batch."""
     return hasattr(model, "tcn")  # ByteTCNClassifier wraps ByteTCNFusionNet
+
+
+def model_input(model: nn.Module, batch: Dict[str, Any]) -> torch.Tensor:
+    """Build the byte sequence expected by a standard-pipeline model."""
+    header = batch["header_ids"]
+    body = batch["body_ids"]
+    if not getattr(model, "requires_compact_sequence", False):
+        return torch.cat([header, body], dim=1)
+
+    compact_rows = []
+    for header_row, body_row in zip(header, body):
+        compact_rows.append(torch.cat([
+            header_row[header_row.ne(PAD_IDX)],
+            body_row[body_row.ne(PAD_IDX)],
+        ]))
+    max_length = max(row.numel() for row in compact_rows)
+    sequence = header.new_full((len(compact_rows), max_length), PAD_IDX)
+    for index, row in enumerate(compact_rows):
+        sequence[index, :row.numel()] = row
+    return sequence
 
 
 class Trainer(BaseTrainer):
@@ -37,6 +57,7 @@ class Trainer(BaseTrainer):
         patience: int = 0,
         lr_scheduler_cfg: Optional[Dict[str, Any]] = None,
         pu_prior: Optional[float] = None,
+        target_field: str = "alerted",
     ) -> None:
         # Build a training_cfg dict for the base class
         training_cfg: Dict[str, Any] = {
@@ -48,6 +69,7 @@ class Trainer(BaseTrainer):
         self.model = model.to(device)
         self.output_mode = output_mode
         self.threshold = threshold
+        self.target_field = target_field
         self.pu_mode = pu_prior is not None
         if class_weights is not None:
             class_weights = class_weights.to(device)
@@ -92,6 +114,7 @@ class Trainer(BaseTrainer):
         all_losses: List[float] = []
         all_true: List[int] = []
         all_pred: List[int] = []
+        all_scores: List[torch.Tensor] = []
 
         stopped_early = False
         dict_mode = _is_dict_model(self.model)
@@ -104,15 +127,17 @@ class Trainer(BaseTrainer):
 
                 # ── unpack batch ────────────────────────
                 if isinstance(batch, dict):
-                    batch = {k: v.to(self.device) for k, v in batch.items()}
-                    yb = batch.get("alerted", batch.get("is_attack"))
+                    batch = to_device(batch, self.device)
+                    yb = batch.get(self.target_field)
+                    if yb is None:
+                        raise ValueError(
+                            f"Batch does not contain configured target field {self.target_field!r}"
+                        )
 
                     if dict_mode:
                         logits = self.model(batch)
                     else:
-                        ids = torch.cat(
-                            [batch["header_ids"], batch["body_ids"]], dim=1,
-                        )
+                        ids = model_input(self.model, batch)
                         logits = self.model(ids)
                 else:
                     # Legacy tuple batch (backward compat)
@@ -137,6 +162,7 @@ class Trainer(BaseTrainer):
                 all_losses.append(loss.item())
                 if self.output_mode == "binary":
                     probs = torch.sigmoid(logits)
+                    all_scores.append(probs.detach().cpu())
                     preds = (probs >= self.threshold).long()
                     all_true.extend(yb.long().tolist())
                     all_pred.extend(preds.tolist())
@@ -156,9 +182,21 @@ class Trainer(BaseTrainer):
                 "loss": avg_loss,
             }, stopped_early
 
-        metrics = MetricUtils.compute_binary_metrics(
-            np.array(all_true), np.array(all_pred)
-        )
+        if self.output_mode == "binary" and all_scores:
+            scores = torch.cat(all_scores).reshape(-1)
+            best = pr_curve_best_f1(scores, torch.tensor(all_true, dtype=torch.float32))
+            threshold = float(best["best_threshold"])
+            self.threshold = threshold if not train else self.threshold
+            preds = (scores >= threshold).long()
+            metrics = MetricUtils.compute_binary_metrics(
+                np.array(all_true), preds.numpy()
+            )
+            metrics["threshold"] = threshold
+            metrics["best_threshold"] = threshold
+        else:
+            metrics = MetricUtils.compute_binary_metrics(
+                np.array(all_true), np.array(all_pred)
+            )
         metrics["loss"] = avg_loss
         return avg_loss, metrics, stopped_early
 
@@ -244,6 +282,7 @@ class Trainer(BaseTrainer):
 
         if best_state:
             torch.save(best_state, out_dir / "model_best.pt")
+            self.model.load_state_dict(best_state["model_state_dict"])
             logger.info("Best model saved with %s=%.4f", best_metric_name, best_metric)
             return history, best_state["val_metrics"], last_state
 

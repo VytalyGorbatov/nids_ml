@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/vhorbato/Academy/nids_ml/artifacts/processors/epoch_budget_campaign.py", line 417, in <module>
+    main()
+    ~~~~^^
+  File "/home/vhorbato/Academy/nids_ml/artifacts/processors/epoch_budget_campaign.py", line 335, in main
+    raise FileNotFoundError(f"No model_ep*.pt checkpoints found in {run_dir}")
+FileNotFoundError: No model_ep*.pt checkpoints found in /home/vhorbato/Academy/nids_ml/artifacts/article_1/runs/new-set/baseline_tcn_pu

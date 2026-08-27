@@ -1,7 +1,7 @@
 {
   "artifacts": {
-    "out_dir": "./artifacts/article_1/runs/new-set/baseline_cnn_alerted",
-    "best_metric": "f1"
+    "best_metric": "f1",
+    "out_dir": "./artifacts/article_1/runs/new-set/baseline_tcn_pu"
   },
   "attack_paths": {
     "test": "../sip-dataset/new_general_split/attack/test.json",
@@ -21,27 +21,47 @@
     "sep_byte": 30,
     "split_by": "alerted"
   },
+  "model": {
+    "buffer_proj_dim": 192,
+    "byte_embed_dim": 32,
+    "fusion_hidden_dim": 256,
+    "norm_groups": 8,
+    "num_classes": null,
+    "pad_idx": 256,
+    "prefix_lengths": [
+      64,
+      128,
+      256,
+      512
+    ],
+    "share_byte_encoder": false,
+    "tcn_channels": 96,
+    "tcn_dilations": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "tcn_dropout": 0.1,
+    "tcn_kernel_size": 5,
+    "threshold": 0.5,
+    "type": "tcn",
+    "use_film": false,
+    "vocab_size": 257
+  },
   "sampling": {
     "enabled": false,
     "with_replacement": false
   },
   "seed": 703598092,
-  "model": {
-    "type": "cnn",
-    "vocab_size": 257,
-    "embed_dim": 16,
-    "num_classes": 2,
-    "conv_channels": [16, 32, 64, 256],
-    "kernel_sizes": [7, 5, 3, 2],
-    "dropout": 0.2,
-    "class_weights": [1.0, 3.0]
-  },
   "training": {
     "batch_size": 256,
     "epochs": 15,
-    "learning_rate": 0.0003,
-    "weight_decay": 0.0001,
+    "learning_rate": 0.0001,
+    "num_workers": 0,
     "patience": 7,
-    "num_workers": 0
+    "pu_prior": 0.12,
+    "pu_prior_scope": "pool",
+    "weight_decay": 0.0001
   }
 }
