@@ -71,27 +71,60 @@ class TwoWayPipeline:
             "training.allow_random_frozen_backbone=true to accept this."
         )
 
+    def _run_dry(self, loaders: Dict[str, DataLoader], model: torch.nn.Module) -> None:
+        logger.info("TwoWay dry run initiated.")
+        model = model.to(self.device)
+        model.eval()
+        with torch.no_grad():
+            for name in ["train_p", "train_u", "val"]:
+                loader = loaders.get(name)
+                if not loader or len(loader) == 0:
+                    logger.warning("Dry run: loader %r is empty or missing.", name)
+                    continue
+                batch = next(iter(loader))
+                batch = to_device(batch, self.device)
+                if hasattr(model, "backbone") and hasattr(model, "heads"):
+                    z = model.backbone(batch)
+                    head_out = model.heads(z)
+                    logger.info(
+                        "Dry run %s forward pass successful. risk_logit shape: %s, alerted_logit shape: %s, proj shape: %s",
+                        name,
+                        tuple(head_out["risk_logit"].shape),
+                        tuple(head_out["alerted_logit"].shape),
+                        tuple(head_out["proj"].shape),
+                    )
+                else:
+                    out = model(batch)
+                    logger.info("Dry run %s forward pass successful. Output shape: %s", name, tuple(out.shape))
+        logger.info("TwoWay dry run completed successfully.")
+
     def run(
         self,
         stop_flag: Optional[Callable[[], bool]] = None,
         pretrained_path: Optional[str] = None,
+        dry_run: bool = False,
     ) -> Tuple[Dict[str, Any], Dict[str, float], Dict[str, float]]:
         # 1. Build data loaders
         training_cfg = self.config.get("training", {})
-        self._check_backbone_initialisation(training_cfg, pretrained_path)
+        if not dry_run:
+            self._check_backbone_initialisation(training_cfg, pretrained_path)
 
         builder = TwoWayDatasetBuilder(self.config)
         loaders = builder.build_loaders()
-
-        artifacts_cfg = self.config.get("artifacts", {})
-        out_dir = Path(artifacts_cfg.get("out_dir", "./artifacts"))
-        out_dir.mkdir(parents=True, exist_ok=True)
 
         # 2. Build model via factory
         model = build_model(self.config)
 
         n_params = sum(p.numel() for p in model.parameters())
         logger.info("Model parameters: %s", f"{n_params:,}")
+
+        if dry_run:
+            self._run_dry(loaders, model)
+            return {}, {}, {}
+
+        artifacts_cfg = self.config.get("artifacts", {})
+        out_dir = Path(artifacts_cfg.get("out_dir", "./artifacts"))
+        out_dir.mkdir(parents=True, exist_ok=True)
 
         # 3. Train — optionally skip Stage 1 by loading a pretrained checkpoint
         trainer = TwoWayTrainer(model, self.device, training_cfg)

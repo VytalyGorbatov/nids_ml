@@ -49,7 +49,10 @@ def main() -> int:
         return 1
 
     if args.epochs:
-        config.setdefault("training", {})["epochs"] = args.epochs
+        training_cfg = config.setdefault("training", {})
+        training_cfg["epochs"] = args.epochs
+        training_cfg["max_epochs_pretrain"] = args.epochs
+        training_cfg["max_epochs_pu"] = args.epochs
 
     set_global_seed(int(config.get("seed", 42)))
     device = DataUtils.resolve_device(args.device)
@@ -73,7 +76,11 @@ def main() -> int:
         if args.calibrate:
             pipeline.calibrate(checkpoint_path=args.calibrate)
         else:
-            pipeline.run(stop_flag=stop_fn, pretrained_path=args.pretrained)
+            pipeline.run(
+                stop_flag=stop_fn,
+                pretrained_path=args.pretrained,
+                dry_run=args.dry_run,
+            )
     else:
         pipeline = ClassifierPipeline(config=config, device=device)
         pipeline.run(

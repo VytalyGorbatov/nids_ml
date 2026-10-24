@@ -17,7 +17,7 @@ The loss functions (``nnpu_loss``, ``contrastive_nt_xent``) are provided by
 """
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -89,12 +89,16 @@ class ByteTCNBackbone(nn.Module):
         prefix_lengths: Tuple[int, ...] = (64, 128, 256),
         proj_dim: int = 192,
         fusion_dim: int = 256,
+        header_prefix_lengths: Optional[Tuple[int, ...]] = None,
+        body_prefix_lengths: Optional[Tuple[int, ...]] = None,
     ) -> None:
         super().__init__()
+        h_prefixes = header_prefix_lengths if header_prefix_lengths is not None else prefix_lengths
+        b_prefixes = body_prefix_lengths if body_prefix_lengths is not None else prefix_lengths
         self.enc_h = ByteEncoder(embed_dim, channels, kernel, dilations,
-                                 dropout, prefix_lengths, proj_dim)
+                                 dropout, h_prefixes, proj_dim)
         self.enc_b = ByteEncoder(embed_dim, channels, kernel, dilations,
-                                 dropout, prefix_lengths, proj_dim)
+                                 dropout, b_prefixes, proj_dim)
 
         fusion_in = proj_dim * 2
         self.fusion = nn.Sequential(
@@ -174,15 +178,28 @@ class ByteTCN2WayClassifier(BaseClassifier):
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ByteTCN2WayClassifier":
         model_cfg = config.get("model", {})
+        prefix_lengths = tuple(model_cfg.get("prefix_lengths", [64, 128, 256]))
+        header_prefixes = (
+            tuple(model_cfg["header_prefix_lengths"])
+            if "header_prefix_lengths" in model_cfg
+            else prefix_lengths
+        )
+        body_prefixes = (
+            tuple(model_cfg["body_prefix_lengths"])
+            if "body_prefix_lengths" in model_cfg
+            else prefix_lengths
+        )
         backbone = ByteTCNBackbone(
             embed_dim=int(model_cfg.get("embed_dim", 32)),
             channels=int(model_cfg.get("channels", 96)),
             kernel=int(model_cfg.get("kernel", 5)),
             dilations=tuple(model_cfg.get("dilations", [1, 2, 4, 8])),
             dropout=float(model_cfg.get("dropout", 0.1)),
-            prefix_lengths=tuple(model_cfg.get("prefix_lengths", [64, 128, 256])),
+            prefix_lengths=prefix_lengths,
             proj_dim=int(model_cfg.get("proj_dim", 192)),
             fusion_dim=int(model_cfg.get("fusion_dim", 256)),
+            header_prefix_lengths=header_prefixes,
+            body_prefix_lengths=body_prefixes,
         )
         heads = Heads(backbone.out_dim)
         return cls(backbone, heads)

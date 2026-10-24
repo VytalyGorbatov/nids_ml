@@ -138,11 +138,17 @@ class TwoWayDatasetBuilder:
     def __init__(self, config: Dict[str, Any]) -> None:
         self.config = config
         data_dict = config.get("data", {})
+        fixed_len = int(data_dict.get("fixed_len", 1024))
+        fallback_header_len = int(data_dict.get("fallback_header_len", 512))
+        header_len = int(data_dict["header_len"]) if "header_len" in data_dict and data_dict["header_len"] is not None else None
+        body_len = int(data_dict["body_len"]) if "body_len" in data_dict and data_dict["body_len"] is not None else None
         self.cfg = DataConfig2Way(
-            fixed_len=int(data_dict.get("fixed_len", 1024)),
-            fallback_header_len=int(data_dict.get("fallback_header_len", 512)),
+            fixed_len=fixed_len,
+            fallback_header_len=fallback_header_len,
             buffer_field=data_dict.get("buffer_field", "buffers"),
             sep_byte=int(data_dict.get("sep_byte", SEP_BYTE)),
+            header_len=header_len,
+            body_len=body_len,
         )
 
     # ── path helpers ────────────────────────────────
@@ -185,6 +191,21 @@ class TwoWayDatasetBuilder:
         return usable, len(dataset)
 
     def _load_split_records(self, split: str) -> List[Dict[str, Any]]:
+        if "split_paths" in self.config:
+            paths = self._ensure_path_list(self.config.get("split_paths", {}).get(split))
+            records: List[Dict[str, Any]] = []
+            offset = 0
+            for path in paths:
+                source_records, file_length = self._load_records_from_file(path)
+                for record in source_records:
+                    record["source_index"] = offset + record.pop("_file_position")
+                    record["source_class"] = (
+                        "attack" if int(record.get("is_attack", 0)) == 1 else "benign"
+                    )
+                offset += file_length
+                records.extend(source_records)
+            return records
+
         benign = self._ensure_path_list(self.config.get("benign_paths", {}).get(split))
         attack = self._ensure_path_list(self.config.get("attack_paths", {}).get(split))
         records: List[Dict[str, Any]] = []
@@ -200,9 +221,11 @@ class TwoWayDatasetBuilder:
         return records
 
     @staticmethod
-    def _is_sip_header_body(record: Dict[str, Any]) -> bool:
+    def _is_header_body(record: Dict[str, Any]) -> bool:
         names = str(record.get("buffer_names", ""))
-        return "sip_header" in names and "sip_body" in names
+        return "header" in names and ("body" in names or "client_body" in names)
+
+    _is_sip_header_body = _is_header_body
 
     def _build_u_weighted_sampler(
         self,
@@ -224,7 +247,7 @@ class TwoWayDatasetBuilder:
             w = 1.0
             if int(rec.get("pkt_gen", 0)) == 1:
                 w *= max(1.0, stream_ip_multiplier)
-            if self._is_sip_header_body(rec):
+            if self._is_header_body(rec):
                 w *= max(1.0, header_body_multiplier)
             if max_multiplier > 0:
                 w = min(w, max_multiplier)

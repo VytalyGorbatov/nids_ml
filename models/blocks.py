@@ -41,6 +41,8 @@ def masked_max(x: torch.Tensor, mask: torch.Tensor, dim: int) -> torch.Tensor:
 def make_prefix_mask(base_mask: torch.Tensor, prefix_len: int) -> torch.Tensor:
     """Restrict *base_mask* (``[B, L]`` bool) to the first *prefix_len* positions."""
     seq_len = base_mask.size(1)
+    if seq_len == 0 or prefix_len <= 0:
+        return torch.zeros_like(base_mask, dtype=torch.bool)
     device = base_mask.device
     prefix_pos = torch.arange(seq_len, device=device).unsqueeze(0) < prefix_len
     return base_mask & prefix_pos

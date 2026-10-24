@@ -53,7 +53,12 @@ class RecordDataset(Dataset):
         r = self.records[idx]
         ids = decode_buffers_field(r[self.cfg.buffer_field])
         header_ids, body_ids = split_header_body(
-            ids, self.cfg.fixed_len, self.cfg.sep_byte, self.cfg.fallback_header_len,
+            ids,
+            fixed_len=self.cfg.fixed_len,
+            sep_byte=self.cfg.sep_byte,
+            fallback_header_len=self.cfg.fallback_header_len,
+            header_len=self.cfg.header_len,
+            body_len=self.cfg.body_len,
         )
         return {
             "header_ids": header_ids,
@@ -90,12 +95,16 @@ class DatasetBuilder:
             config.get("model", {}).get("split_byte", SEP_BYTE),
         ))
         fixed_len = int(data_cfg.get("fixed_len", 1024))
-
+        fallback_header_len = int(data_cfg.get("fallback_header_len", fixed_len // 2))
+        header_len = int(data_cfg["header_len"]) if "header_len" in data_cfg and data_cfg["header_len"] is not None else None
+        body_len = int(data_cfg["body_len"]) if "body_len" in data_cfg and data_cfg["body_len"] is not None else None
         self.cfg = DataConfig2Way(
             fixed_len=fixed_len,
-            fallback_header_len=int(data_cfg.get("fallback_header_len", fixed_len // 2)),
+            fallback_header_len=fallback_header_len,
             buffer_field=data_cfg.get("buffer_field", "buffers"),
             sep_byte=sep_byte,
+            header_len=header_len,
+            body_len=body_len,
         )
         self.label_field = data_cfg.get("label_field", "alerted")
         self.split_by = data_cfg.get("split_by", self.label_field)
@@ -117,13 +126,17 @@ class DatasetBuilder:
         datasets: Dict[str, RecordDataset] = {}
 
         for split in ["train", "val", "test"]:
-            benign_paths = DataUtils.ensure_path_list(benign_paths_cfg.get(split))
-            attack_paths = DataUtils.ensure_path_list(attack_paths_cfg.get(split))
+            if "split_paths" in self.config:
+                paths = DataUtils.ensure_path_list(self.config.get("split_paths", {}).get(split))
+                all_records = self._load_group(paths, default_label=0)
+            else:
+                benign_paths = DataUtils.ensure_path_list(benign_paths_cfg.get(split))
+                attack_paths = DataUtils.ensure_path_list(attack_paths_cfg.get(split))
 
-            attack_records = self._load_group(attack_paths, default_label=1)
-            benign_records = self._load_group(benign_paths, default_label=0)
+                attack_records = self._load_group(attack_paths, default_label=1)
+                benign_records = self._load_group(benign_paths, default_label=0)
 
-            all_records = attack_records + benign_records
+                all_records = attack_records + benign_records
 
             if not all_records:
                 logger.warning("Split '%s' is empty.", split)
@@ -231,6 +244,7 @@ class DatasetBuilder:
 
             rec["_train_label"] = train_label
             rec["_split_label"] = split_label
+            rec.setdefault("source_class", "attack" if is_attack_val == 1 else "benign")
             records.append(rec)
 
         return records

@@ -12,7 +12,7 @@ import random
 import re
 from hashlib import sha256
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
 from torch.utils.data import Dataset
@@ -57,7 +57,7 @@ def buffer_sha256(buffer_value: Any) -> str:
 
 def extract_record_call_id(record: Dict[str, Any], buffer_field: str) -> Optional[str]:
     """Return an explicit or SIP-header Call-ID for prediction provenance."""
-    explicit_call_id = record.get("call_id")
+    explicit_call_id = record.get("request_id") or record.get("call_id") or record.get("seq_id")
     if explicit_call_id is not None and str(explicit_call_id).strip():
         return str(explicit_call_id).strip()
 
@@ -89,22 +89,31 @@ def split_header_body(
     fixed_len: int,
     sep_byte: int = SEP_BYTE,
     fallback_header_len: Optional[int] = None,
+    header_len: Optional[int] = None,
+    body_len: Optional[int] = None,
 ) -> Tuple[List[int], List[int]]:
-    """Split a byte stream into header and body at the first ``sep_byte``."""
+    """Split a byte stream into header and body at the first ``sep_byte`` (0x1E)."""
     if fallback_header_len is None:
         fallback_header_len = fixed_len // 2
 
-    header_len = fallback_header_len
-    body_len = fixed_len - header_len
+    if header_len is None:
+        header_len = fallback_header_len
+    if body_len is None:
+        body_len = fixed_len - header_len
 
-    ids_fixed = pad_or_truncate(ids, fixed_len)
     try:
-        sep_pos = ids_fixed.index(sep_byte)
-        header_raw = ids_fixed[:sep_pos]
-        body_raw = ids_fixed[sep_pos + 1:]
+        sep_pos = ids.index(sep_byte)
+        header_raw = ids[:sep_pos]
+        body_raw = ids[sep_pos + 1:]
+        if body_raw and body_raw[-1] == sep_byte:
+            body_raw = body_raw[:-1]
     except ValueError:
-        header_raw = ids_fixed[:header_len]
-        body_raw = ids_fixed[header_len:]
+        if fallback_header_len is not None and len(ids) > fallback_header_len:
+            header_raw = ids[:fallback_header_len]
+            body_raw = ids[fallback_header_len:]
+        else:
+            header_raw = ids
+            body_raw = []
 
     return (
         pad_or_truncate(header_raw, header_len),
@@ -121,6 +130,14 @@ class DataConfig2Way:
     fallback_header_len: int = 512
     buffer_field: str = "buffers"
     sep_byte: int = SEP_BYTE
+    header_len: Optional[int] = None
+    body_len: Optional[int] = None
+
+    def __post_init__(self) -> None:
+        if self.header_len is None:
+            self.header_len = self.fallback_header_len or (self.fixed_len // 2)
+        if self.body_len is None:
+            self.body_len = self.fixed_len - self.header_len
 
 
 # ─── Dataset ──────────────────────────────────────────
@@ -145,7 +162,12 @@ class TwoWayRecordDataset(Dataset):
         r = self.records[idx]
         ids = decode_buffers_field(r[self.cfg.buffer_field])
         header_ids, body_ids = split_header_body(
-            ids, self.cfg.fixed_len, self.cfg.sep_byte, self.cfg.fallback_header_len,
+            ids,
+            fixed_len=self.cfg.fixed_len,
+            sep_byte=self.cfg.sep_byte,
+            fallback_header_len=self.cfg.fallback_header_len,
+            header_len=self.cfg.header_len,
+            body_len=self.cfg.body_len,
         )
         return {
             "header_ids": header_ids,
